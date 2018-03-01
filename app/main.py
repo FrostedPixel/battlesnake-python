@@ -1,8 +1,15 @@
 import bottle
 import os
 import random
+import numpy
 
+def calculateZones(width, height, sID, snakes):
+    zones = numpy.matrix(zones)
+    return zones
 
+def calculateWeights(width, height, snakes, food):
+    weights = numpy.matrix(weights)
+    return weights
 
 @bottle.route('/')
 def static():
@@ -17,33 +24,27 @@ def static(path):
 @bottle.post('/start')
 def start():
     data = bottle.request.json
-    game_id = data.get('game_id')
-    board_width = data.get('width')
-    board_height = data.get('height')
-
-    head_url = '%s://%s/static/head.png' % (
-        bottle.request.urlparts.scheme,
-        bottle.request.urlparts.netloc
-    )
-
-    # TODO: Do things with data
-
     return {
         'color': '#00FF00',
-        'taunt': '{} ({}x{})'.format(game_id, board_width, board_height),
-        'head_url': head_url
+        'taunt': 'Where is the food?',
+        'head_type': 'smile',
+        'tail_type': 'regular'
     }
 
 
 @bottle.post('/move')
 def move():
     data = bottle.request.json
-
-    # TODO: Do things with data
-    
     directions = ['up', 'down', 'left', 'right']
+    board = numpy.matrix(board)
+    zones = calculateZones(data.get('width'), data.get('height'), data.get('you').get('id'), data.get('snakes').get('data'))
+    weights = calculateWeights(data.get('width'), data.get('height'), data.get('snakes').get('data'), data.get('food'))
+    board = zones * weight
+    
+    # TODO: Do things with data
+
     direction = random.choice(directions)
-    print direction
+
     return {
         'move': direction,
         'taunt': 'battlesnake-python!'
