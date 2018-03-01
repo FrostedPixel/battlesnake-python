@@ -3,13 +3,20 @@ import os
 import random
 import numpy
 
-def calculateZones(width, height, sID, snakes):
-    zones = numpy.matrix(zones)
+def calculateZones(width, height, snake, challengers):
+    zones = numpy.zeroes((width,height))
     return zones
 
-def calculateWeights(width, height, snakes, food):
-    weights = numpy.matrix(weights)
+def calculateWeights(width, height, challengers, food):
+    weights = numpy.zeroes((width,height))
     return weights
+
+def removeDeadChallengers(challengers):
+    livingSnakes = []
+    for x in range(len(challengers)):
+        if challengers[x]['health'] > 0:
+            livingSnakes.append(challengers[x])
+    return livingSnakes
 
 @bottle.route('/')
 def static():
@@ -31,14 +38,21 @@ def start():
         'tail_type': 'regular'
     }
 
+@bottle.post('/end')
+def end():
+    return "ack"
 
 @bottle.post('/move')
 def move():
     data = bottle.request.json
     directions = ['up', 'down', 'left', 'right']
-    board = numpy.matrix(board)
-    zones = calculateZones(data.get('width'), data.get('height'), data.get('you').get('id'), data.get('snakes').get('data'))
-    weights = calculateWeights(data.get('width'), data.get('height'), data.get('snakes').get('data'), data.get('food'))
+
+    challengers = data.get('snakes').get('data')
+    challengers = removeDeadChallengers(challangers)
+    
+    board = numpy.zeroes((data.get('width'),data.get('height')))
+    zones = calculateZones(data.get('width'), data.get('height'), data.get('you'), challengers)
+    weights = calculateWeights(data.get('width'), data.get('height'), challengers, data.get('food'))
     board = zones * weight
     
     # TODO: Do things with data
