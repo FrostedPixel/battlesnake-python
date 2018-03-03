@@ -129,12 +129,14 @@ def move():
             for tough in [(1, 1), (-1, -1), (1, -1), (-1, 1)]:
                 snake_segment = point(int(snake['body']['data'][0]['x']), int(snake['body']['data'][0]['y']))
                 tough_segment = point(clamp(snake_segment.x + tough.x, 0, len(board[0]), clamp(snake_segment.y + tough.y, 0, len(board[0][0]))
-                if (snake_segment == tough_segment): continue
+                if (snake_segment == tough_segment):
+                    continue
                 board[tough_segment.x][tough_segment.y] = symbols['tough']
             for wall in [point(0, 1), point(0, -1), point(1, 0), point(-1, 0)]:
                 snake_segment = point(int(snake['body']['data'][0]['x']), int(snake['body']['data'][0]['y']))
                 wall_segment = point(clamp(snake_segment.x + wall.x, 0, len(board[0]), clamp(snake_segment.y + wall.y, 0, len(board[0][0]))
-                if (snake_segment == wall_segment): continue
+                if (snake_segment == wall_segment):
+                    continue
                 board[wall_segment.x][wall_segment.y] = symbols['wall']
         for segment in snake['body']['data']:
             board[int(segment['x'])][int(segment['y'])] = symbols['wall']
@@ -157,8 +159,6 @@ def move():
         'move': directions[point(path[0].x - startPoint.x, path[0].y - startPoint.y)],
         'taunt': 'battlesnake-python!'
     }
-
-
 
 # Expose WSGI app (so gunicorn can find it)
 application = bottle.default_app()
