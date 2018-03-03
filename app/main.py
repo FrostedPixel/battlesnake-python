@@ -120,7 +120,7 @@ def shortestPath(board, costBoard, startPoint, endPoint, earlyReturn = False):
                 costSoFar[nextPoint] = newCost
                 openList.put(nextPoint, newCost + distScore[x][y])
                 cameFrom[nextPoint] = currentPoint
-    return cameFrom
+    return cameFrom, costSoFar
 
 @bottle.route('/')
 def static():
@@ -175,14 +175,12 @@ def move():
     foodList = []
 
     # mark challengers as 'walls' on board
-    #for snake in challengers:
-    #    snakePos = point(snake['body']['data'][0]['x'], \
-    #            snake['body']['data'][0]['y'])
-    #    if (snake['id'] != you['id']) and (snake['length'] >= you['length']):
-    #        placeHalo(board,snakePos,symbols['diag'],symbols['slow'])
-    #        placeHalo(board,snakePos,symbols['orth'],symbols['wall'])
-    #    elif (snake['id'] != you['id']) and (snake['length'] < you['length']) and (you['health'] > symbols['HuntThresh']):
-    #        data['food']['data'].append({"x":snakePos.x, "y":snakePos.y})
+    for snake in challengers:
+        snakePos = point(snake['body']['data'][0]['x'], \
+                snake['body']['data'][0]['y'])
+        if (snake['id'] != you['id']) and (snake['length'] >= you['length']):
+            #placeHalo(board,snakePos,symbols['diag'],symbols['slow'])
+            placeHalo(board,snakePos,symbols['orth'],symbols['wall'])
 
     # Add food to board
     for food in data['food']['data']:
@@ -205,17 +203,18 @@ def move():
             board[segment['x']][segment['y']] = symbols['wall']
 
     # find nearest food
-    endPoint = point(data['food']['data'][0]['x'],data['food']['data'][0]['y'])
-    distanceToFood = (abs(endPoint.x - startPoint.x) + abs(endPoint.y - startPoint.y))
-    for food in data['food']['data']:
-        currentDistance = (abs(startPoint.x - food['x']) + \
-                abs(startPoint.y - food['y']))
-        if (currentDistance < distanceToFood):
-            distanceToFood = currentDistance
-            endPoint = point(food['x'],food['y'])
+    #    elif (snake['id'] != you['id']) and (snake['length'] < you['length']) and (you['health'] > symbols['HuntThresh']):
+    #        data['food']['data'].append({"x":snakePos.x, "y":snakePos.y})
+    smallestCost = 10000
+    path = {}
+    for food in foodList:
+        curPath, curCosts = shortestPath(board, costBoard, startPoint, food, False)
+        if startPoint in curCosts and curCosts[startPoint] < smallestCost:
+            smallestCost = curCost[startPoint]
+            path = curPath
 
     # find shortest path to food
-    path = shortestPath(board, costBoard, startPoint, endPoint, False)
+    #path = shortestPath(board, costBoard, startPoint, endPoint, False)
     # direction = random.choice(directions)
 
     #print "Sanity check startPoint = " + str(startPoint) + " x,y = " + str(startX) + "," + str(startY)
