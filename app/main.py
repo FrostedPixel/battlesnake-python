@@ -232,11 +232,14 @@ def move():
     #    pathAsList.append(curPt)
     #    iters += 1
     #print "Path = ", pathAsList
-
+    firstSquare = point(0, 1)
     if startPoint in path:
         firstSquare = path[startPoint]
     else:
-        firstSquare = startPoint + point(1, 0)
+        for direc in symbols['orth']:
+            potential = point(startPoint.x + direc[0], startPoint.y + direc[1])
+            if potential.testInBoard(board) and board[potential.x][potential.y] != symbols['wall']:
+                firstSquare = potential
 
     squareToMoveTo = firstSquare  - startPoint
     if squareToMoveTo in directions:
