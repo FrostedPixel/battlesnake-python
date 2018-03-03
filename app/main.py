@@ -178,6 +178,8 @@ def move():
     iters = 0
     while curPt != endPoint and iters < 50:
         if curPt not in path:
+            print "break in path!"
+            printDic(path)
             break;
         curPt = path[curPt]
         pathAsList.append(curPt)
@@ -185,7 +187,10 @@ def move():
 
     print pathAsList
 
-    firstSquare = path[startPoint]
+    if startPoint in path:
+        firstSquare = path[startPoint]
+    else:
+        firstSquare = startPoint + point(1, 0)
 
     squareToMoveTo = firstSquare  - startPoint
     if squareToMoveTo in directions:
