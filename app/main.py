@@ -106,7 +106,7 @@ def move():
     directions = {point(0,-1):'up', point(0,1):'down', point(-1,0):'left', point(1,0):'right'}
 
     you = data['you']
-    startPoint = point((int(you['body']['data']['x']),int(you['body']['data']['y'])))
+    startPoint = point(int(you['body']['data']['x']),int(you['body']['data']['y']))
 
     # generate board, and fill with movement cost of '1'
     board = [[1 for x in range(data['width'])] for y in range(['height'])]
@@ -126,10 +126,10 @@ def move():
             board[int(segment['x'])][int(segment['y'])] = symbols['wall']
 
     # find nearest food
-    endPoint = point((int(data['food']['data']['x']),int(data['food']['data']['y'])))
+    endPoint = point(int(data['food']['data']['x']),int(data['food']['data']['y']))
     distanceToFood = abs(endPoint - startPoint)
     for food in data['food']['data']:
-        currentDistance = abs(endPoint - point((int(food['data']['x']),int(food['data']['y']))))
+        currentDistance = abs(endPoint - point(int(food['data']['x']),int(food['data']['y'])))
         if (currentDistance < distanceToFood):
             distanceToFood = currentDistance
             endPoint = food
