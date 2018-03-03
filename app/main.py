@@ -12,7 +12,7 @@ symbols = {
     'diag':[(1,1),(-1,-1),(1,-1),(-1,1)],
     }
 
-class cBoard([[],[]]):
+class cBoard([]):
     field = []
     width = 0
     height = 0
