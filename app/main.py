@@ -120,7 +120,7 @@ def shortestPath(board, costBoard, startPoint, endPoint, earlyReturn = False):
                 costSoFar[nextPoint] = newCost
                 openList.put(nextPoint, newCost + distScore[x][y])
                 cameFrom[nextPoint] = currentPoint
-    return cameFrom, costSoFar
+    return cameFrom
 
 @bottle.route('/')
 def static():
@@ -205,16 +205,16 @@ def move():
     # find nearest food
     #    elif (snake['id'] != you['id']) and (snake['length'] < you['length']) and (you['health'] > symbols['HuntThresh']):
     #        data['food']['data'].append({"x":snakePos.x, "y":snakePos.y})
-    smallestCost = 10000
-    path = {}
+    endPoint = foodList[0]
+    distanceToFood = (abs(endPoint.x - startPoint.x) + abs(endPoint.y - startPoint.y))
     for food in foodList:
-        curPath, curCosts = shortestPath(board, costBoard, startPoint, food, True)
-        if startPoint in curCosts and curCosts[startPoint] < smallestCost:
-            smallestCost = curCosts[startPoint]
-            path = curPath
+        currentDistance = (abs(startPoint.x - food.x) + abs(startPoint.y - food.y))
+        if (currentDistance < distanceToFood):
+            distanceToFood = currentDistance
+            endPoint = food
 
     # find shortest path to food
-    #path = shortestPath(board, costBoard, startPoint, endPoint, False)
+    path = shortestPath(board, costBoard, startPoint, endPoint, False)
     # direction = random.choice(directions)
 
     #print "Sanity check startPoint = " + str(startPoint) + " x,y = " + str(startX) + "," + str(startY)
