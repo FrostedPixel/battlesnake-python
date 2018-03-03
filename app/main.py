@@ -102,7 +102,7 @@ def end():
 @bottle.post('/move')
 def move():
     data = bottle.request.json
-    directions = [point(0,-1):'up', point(0,1):'down', point(-1,0):'left', point(1,0):'right']
+    directions = {point(0,-1):'up', point(0,1):'down', point(-1,0):'left', point(1,0):'right'}
 
     you = data['you']
     startPoint = point((you['body']['data']['x'],you['body']['data']['y']))
