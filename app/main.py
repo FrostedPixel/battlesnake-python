@@ -171,11 +171,14 @@ def move():
     # direction = random.choice(directions)
 
     print "Sanity check startPoint = " + str(startPoint) + " x,y = " + str(startX) + "," + str(startY)
+    print "endPoint " + str(endPoint)
 
     pathAsList = []
     curPt = startPoint
     iters = 0
     while curPt != endPoint and iters < 50:
+        if curPt not in path
+            break;
         curPt = path[curPt]
         pathAsList.append(curPt)
         iters += 1
@@ -184,9 +187,14 @@ def move():
 
     firstSquare = path[startPoint]
 
+    squareToMoveTo = firstSquare  - startPoint
+    if squareToMoveTo in directions:
+        dirToMove = directions[squareToMoveTo]
+    else:
+        dirToMove = 'right'
 
     return {
-        'move': directions[firstSquare  - startPoint],
+        'move': dirToMove,
         'taunt': 'battlesnake-python!'
     }
 
