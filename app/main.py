@@ -48,10 +48,10 @@ class point(tuple):
         return self.x == other.x and self.y == other.y
 
     def __add__(self,other):
-        return(self.x + other.x, self.y + other.y)
+        return point(self.x + other.x, self.y + other.y)
 
     def __sub__(self,other):
-        return(self.x - other.x, self.y - other.y)
+        return point(self.x - other.x, self.y - other.y)
 
 def clampValue(val, min, max):
     if val < min:
@@ -168,11 +168,10 @@ def move():
 
     # find shortest path to food
     path = shortestPath(board, startPoint, endPoint)
-
     # direction = random.choice(directions)
 
     return {
-        'move': directions[point(path[0].x - startPoint.x, path[0].y - startPoint.y)],
+        'move': directions[path[startPoint]  - startPoint],
         'taunt': 'battlesnake-python!'
     }
 
