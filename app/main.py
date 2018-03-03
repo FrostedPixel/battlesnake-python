@@ -12,14 +12,14 @@ symbols = {
     'diag':[(1,1),(-1,-1),(1,-1),(-1,1)],
     }
 
-class cBoard(object):
+class cBoard():
     field = []
     width = 0
     height = 0
-    def __init__(b):
-        field = b
-        width = len(b)
-        height = len(b[0])
+    def __init__(self, b):
+        self.field = b
+        self.width = len(b)
+        self.height = len(b[0])
 
     def toString():
         output = ""
@@ -86,11 +86,7 @@ def shortestPath(board, startPoint, endPoint):
     openList = PriorityQueue()
     openList.put(endPoint, 0)
 
-    iters = 0
-
     while not openList.empty():
-        iters += 1
-
         currentPoint = openList.get()
         for dir in symbols['orth']:
             x = clampValue(currentPoint.x+dir[0], 0, board.width)
@@ -180,6 +176,8 @@ def move():
 application = bottle.default_app()
 
 if __name__ == '__main__':
+    field = [[1 for i in range(10)] for j in range(10)]
+    test = cBoard(field)
     bottle.run(
         application,
         host=os.getenv('IP', '0.0.0.0'),
