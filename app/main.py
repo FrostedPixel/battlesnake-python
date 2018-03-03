@@ -160,8 +160,8 @@ def move():
     endPoint = point(data['food']['data'][0]['x'],data['food']['data'][0]['y'])
     distanceToFood = (abs(endPoint.x - startPoint.x) + abs(endPoint.y - startPoint.y))
     for food in data['food']['data']:
-        currentDistance = (abs(endPoint.x - food['x']) + \
-                abs(endPoint.y - food['y']))
+        currentDistance = (abs(startPoint.x - food['x']) + \
+                abs(startPoint.y - food['y']))
         if (currentDistance < distanceToFood):
             distanceToFood = currentDistance
             endPoint = point(food['x'],food['y'])
@@ -170,22 +170,21 @@ def move():
     path = shortestPath(board, startPoint, endPoint)
     # direction = random.choice(directions)
 
-    print "Sanity check startPoint = " + str(startPoint) + " x,y = " + str(startX) + "," + str(startY)
-    print "endPoint " + str(endPoint)
+    #print "Sanity check startPoint = " + str(startPoint) + " x,y = " + str(startX) + "," + str(startY)
+    #print "endPoint " + str(endPoint)
 
-    pathAsList = []
-    curPt = startPoint
-    iters = 0
-    while curPt != endPoint and iters < 50:
-        if curPt not in path:
-            #print "break in path!"
-            #printDic(path)
-            break;
-        curPt = path[curPt]
-        pathAsList.append(curPt)
-        iters += 1
-
-    print "Path = ", pathAsList
+    #pathAsList = []
+    #curPt = startPoint
+    #iters = 0
+    #while curPt != endPoint and iters < 50:
+    #    if curPt not in path:
+    #        #print "break in path!"
+    #        #printDic(path)
+    #        break;
+    #    curPt = path[curPt]
+    #    pathAsList.append(curPt)
+    #    iters += 1
+    #print "Path = ", pathAsList
 
     if startPoint in path:
         firstSquare = path[startPoint]
