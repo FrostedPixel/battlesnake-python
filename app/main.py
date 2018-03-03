@@ -169,7 +169,19 @@ def move():
     # find shortest path to food
     path = shortestPath(board, startPoint, endPoint)
     # direction = random.choice(directions)
-    printDic(path)
+
+    print "Sanity check startPoint = " + str(startPoint) + " x,y = " + startX + "," + startY
+
+    path = []
+    curPt = startPoint
+    iters = 0
+    while curPt != goal and iters < 50:
+        curPt = testPath[curPt]
+        path.append(curPt)
+        iters += 1
+
+    print path
+
     firstSquare = path[startPoint]
 
 
