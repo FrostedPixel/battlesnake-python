@@ -124,9 +124,15 @@ def static(path):
 @bottle.post('/start')
 def start():
     data = bottle.request.json
+
+    head_url = '%s://%s/static/snake.jpeg' % (
+                bottle.request.urlparts.scheme,
+                bottle.request.urlparts.netloc
+            )
     return {
         'color': '#00FF00',
         'taunt': 'Where\'s the food?',
+        'head_url': head_url,
         'head_type': 'smile',
         'tail_type': 'regular'
     }
