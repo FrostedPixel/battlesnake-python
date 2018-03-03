@@ -11,6 +11,7 @@ symbols = {
     'food':10,
     'orth':[(0,1),(1,0),(0,-1),(-1,0)],
     'diag':[(1,1),(-1,-1),(1,-1),(-1,1)],
+    'HuntThresh':25,
     }
 
 class cBoard():
@@ -159,7 +160,7 @@ def move():
         if (snake['id'] != you['id']) and (snake['length'] >= you['length']):
             placeHalo(board,snakePos,symbols['diag'],symbols['slow'])
             placeHalo(board,snakePos,symbols['orth'],symbols['wall'])
-        elif (snake['id'] != you['id']) and (snake['length'] < you['length']):
+        elif (snake['id'] != you['id']) and (snake['length'] < you['length']) and (you['health'] > symbols['HuntThresh']):
             data['food']['data'].append({"x":snakePos.x, "y":snakePos.y})
     for snake in challengers:
         for segment in snake['body']['data']:
