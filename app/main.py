@@ -1,7 +1,7 @@
 import bottle
 import os
 import random
-import operator
+from operator import itemgetter
 
 symbols = {
     'walls':-1,
