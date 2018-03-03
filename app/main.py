@@ -172,15 +172,15 @@ def move():
 
     print "Sanity check startPoint = " + str(startPoint) + " x,y = " + str(startX) + "," + str(startY)
 
-    path = []
+    pathAsList = []
     curPt = startPoint
     iters = 0
-    while curPt != goal and iters < 50:
+    while curPt != endPoint and iters < 50:
         curPt = testPath[curPt]
-        path.append(curPt)
+        pathAsList.append(curPt)
         iters += 1
 
-    print path
+    print pathAsList
 
     firstSquare = path[startPoint]
 
