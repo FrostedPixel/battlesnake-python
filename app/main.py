@@ -111,7 +111,7 @@ def move():
     startPoint = point(startX, startY)
 
     # generate board, and fill with movement cost of '1'
-    board = [[1 for x in range(data['width'])] for y in range(['height'])]
+    board = [[1 for x in range(int(data['width']))] for y in range(int(data['height']))]
 
     # get challengers, and remove dead opponents
     challengers = data['snakes']['data']
