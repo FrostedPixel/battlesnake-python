@@ -210,7 +210,7 @@ def move():
     for food in foodList:
         curPath, curCosts = shortestPath(board, costBoard, startPoint, food, False)
         if startPoint in curCosts and curCosts[startPoint] < smallestCost:
-            smallestCost = curCost[startPoint]
+            smallestCost = curCosts[startPoint]
             path = curPath
 
     # find shortest path to food
