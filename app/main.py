@@ -69,7 +69,7 @@ def removeDeadChallengers(challengers):
 
 def placeHalo(board, snake, targets, val):
     for target in targets:
-        candidate = point(clampValue(snake.x + target[0], 0, board.width)), 
+        candidate = point(clampValue(snake.x + target[0], 0, board.width)), \
             clampValue(snake.y + target[1], 0, board.height))
         if (snake == candidate):
             continue
@@ -160,7 +160,7 @@ def move():
     endPoint = point(data['food']['data'][0]['x'],data['food']['data'][0]['y'])
     distanceToFood = (abs(endPoint.x - startPoint.x) + abs(endPoint.y - startPoint.y))
     for food in data['food']['data']:
-        currentDistance = (abs(endPoint.x - food['x']) + 
+        currentDistance = (abs(endPoint.x - food['x']) + \
                 abs(endPoint.y - food['y']))
         if (currentDistance < distanceToFood):
             distanceToFood = currentDistance
