@@ -69,7 +69,7 @@ def removeDeadChallengers(challengers):
 
 def placeHalo(board, snake, targets, val):
     for target in targets:
-        candidate = point(clampValue(snake.x + target[0], 0, board.width)), \
+        candidate = point(clampValue(snake.x + target[0], 0, board.width), \
             clampValue(snake.y + target[1], 0, board.height))
         if (snake == candidate):
             continue
@@ -147,7 +147,7 @@ def move():
 
     # mark challengers as 'walls' on board
     for snake in challengers:
-        snakePos = point(snake['body']['data'][0]['x'], 
+        snakePos = point(snake['body']['data'][0]['x'], \
                 snake['body']['data'][0]['y'])
         if (snake['id'] != you['id']) and (snake['length'] >= you['length']):
             placeHalo(board,snakePos,symbols['diag'],symbols['slow'])
