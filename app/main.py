@@ -160,8 +160,10 @@ def start():
 def end():
     return "ack"
 
+savedVal = 1
 @bottle.post('/move')
 def move():
+    savedVal += 1
     data = bottle.request.json
     directions = {point(0,-1):'up', point(0,1):'down', point(-1,0):'left', point(1,0):'right'}
 
@@ -266,7 +268,7 @@ def move():
 
     return {
         'move': dirToMove,
-        'taunt': "Kept you waiting huh?"
+        'taunt': str(i)
     }
 
 # Expose WSGI app (so gunicorn can find it)
