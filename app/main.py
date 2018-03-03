@@ -6,9 +6,28 @@ from operator import itemgetter
 symbols = {
     'wall':-1,
     'empty':0,
-    'tough':5,
+    'slow':5,
     'food':10,
+    'orth':[(0,1),(1,0),(0,-1),(-1,0)],
+    'diag':[(1,1),(-1,-1),(1,-1),(-1,1)],
     }
+
+class cBoard(b):
+    field = []
+    width = 0
+    height = 0
+    def __init__(b):
+        field = b
+        width = len(b)
+        height = len(b[])
+
+    def toString():
+        output = ""
+        for r in board:
+            for c in r:
+                 output += str(c).zfill(2)
+            output += '\n'
+        return output
 
 class point(tuple):
     __slots__ = []
@@ -30,13 +49,7 @@ class point(tuple):
     def __sub__(self,other):
         return(self.x - other.x, self.y - other.y)
 
-def printBoard(board):
-    for row in board:
-        for cell in row:
-            print str(cell).zfill(2),
-        print
-
-def clamp(val, min, max):
+def clampValue(val, min, max):
     if val < min:
         return min
     if val > max:
@@ -54,8 +67,16 @@ def removeDeadChallengers(challengers):
             livingSnakes.append(snake)
     return livingSnakes
 
+def placeHalo(board, snake, targets, val):
+    for target in targets:
+        candidate = point(clampValue(snake.x + target[0], 0, board.width)), 
+            clampValue(snake.y + target[1], 0, board.height))
+        if (snake == candidate):
+            continue
+        board[candidate.x][candidate.y] = val
+
 def shortestPath(board, startPoint, endPoint):
-    distScore = [[abs(i - startPoint.x)+abs(j - startPoint.y) for i in range(len(board))] for j in range(len(board[0]))]
+    distScore = [[abs(i - startPoint.x)+abs(j - startPoint.y) for i in range(board.width)] for j in range(board.height)]
 
     cameFrom = {}
     costSoFar = {}
@@ -71,9 +92,9 @@ def shortestPath(board, startPoint, endPoint):
         iters += 1
 
         currentPoint = openList.get()
-        for dir in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
-            x = clamp(currentPoint.x+dir[0], 0, len(board))
-            y = clamp(currentPoint.y+dir[1], 0, len(board[0]))
+        for dir in symbols['orth']:
+            x = clampValue(currentPoint.x+dir[0], 0, board.width)
+            y = clampValue(currentPoint.y+dir[1], 0, board.height)
             nextPoint = point(x, y)
             newCost = costSoFar[currentPoint] + board[x][y]
             if board[x][y] != symbols['wall'] and (nextPoint not in costSoFar or newCost < costSoFar[nextPoint]):
@@ -117,7 +138,8 @@ def move():
     startPoint = point(startX, startY)
 
     # generate board, and fill with movement cost of '1'
-    board = [[1 for x in range(int(data['width']))] for y in range(int(data['height']))]
+    field = [[1 for x in range(int(data['width']))] for y in range(int(data['height']))]
+    board = cBoard(field)
 
     # get challengers, and remove dead opponents
     challengers = data['snakes']['data']
@@ -125,30 +147,24 @@ def move():
 
     # mark challengers as 'walls' on board
     for snake in challengers:
+        snakePos = point(snake['body']['data'][0]['x'], 
+                snake['body']['data'][0]['y'])
         if (snake['id'] != you['id']) and (snake['length'] >= you['length']):
-            for tough in [(1, 1), (-1, -1), (1, -1), (-1, 1)]:
-                snake_segment = point(int(snake['body']['data'][0]['x']), int(snake['body']['data'][0]['y']))
-                tough_segment = point(clamp(snake_segment.x + tough[0], 0, int(data['width'])), clamp(snake_segment.y + tough[1], 0, int(data['height'])))
-                if (snake_segment == tough_segment):
-                    continue
-                board[tough_segment.x][tough_segment.y] = symbols['tough']
-            for wall in [point(0, 1), point(0, -1), point(1, 0), point(-1, 0)]:
-                snake_segment = point(int(snake['body']['data'][0]['x']), int(snake['body']['data'][0]['y']))
-                wall_segment = point(clamp(snake_segment.x + wall[0], 0, int(data['width'])), clamp(snake_segment.y + wall[1], 0, int(data['height'])))
-                if (snake_segment == wall_segment):
-                    continue
-                board[wall_segment.x][wall_segment.y] = symbols['wall']
+            placeHalo(board,snakePos,symbols['diag'],symbols['slow'])
+            placeHalo(board,snakePos,symbols['orth'],symbols['wall'])
+    for snake in challengers:
         for segment in snake['body']['data']:
-            board[int(segment['x'])][int(segment['y'])] = symbols['wall']
+            board[segment['x']][segment['y']] = symbols['wall']
 
     # find nearest food
-    endPoint = point(int(data['food']['data'][0]['x']),int(data['food']['data'][0]['y']))
+    endPoint = point(data['food']['data'][0]['x'],data['food']['data'][0]['y'])
     distanceToFood = (abs(endPoint.x - startPoint.x) + abs(endPoint.y - startPoint.y))
     for food in data['food']['data']:
-        currentDistance = (abs(endPoint.x - int(food['x'])) + abs(endPoint.y - int(food['y'])))
+        currentDistance = (abs(endPoint.x - food['x']) + 
+                abs(endPoint.y - food['y']))
         if (currentDistance < distanceToFood):
             distanceToFood = currentDistance
-            endPoint = food
+            endPoint = point(food['x'],food['y'])
 
     # find shortest path to food
     path = shortestPath(board, startPoint, endPoint)
