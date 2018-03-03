@@ -143,7 +143,7 @@ def move():
 
     # find nearest food
     endPoint = point(int(data['food']['data'][0]['x']),int(data['food']['data'][0]['y']))
-    distanceToFood = abs(endPoint - startPoint)
+    distanceToFood = (abs(endPoint.x - startPoint.x) + abs(endPoint.y - startPoint.y))
     for food in data['food']['data']:
         currentDistance = abs(endPoint - point(int(food['data'][0]['x']),int(food['data'][0]['y'])))
         if (currentDistance < distanceToFood):
