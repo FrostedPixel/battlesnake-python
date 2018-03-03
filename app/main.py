@@ -134,9 +134,15 @@ def static(path):
 @bottle.post('/start')
 def start():
     data = bottle.request.json
+
+    head_url = '%s://%s/static/snake.jpeg' % (
+                bottle.request.urlparts.scheme,
+                bottle.request.urlparts.netloc
+            )
     return {
         'color': '#00FF00',
         'taunt': 'Where\'s the food?',
+        'head_url': head_url,
         'head_type': 'smile',
         'tail_type': 'regular'
     }
@@ -176,7 +182,15 @@ def move():
 
             data['food']['data'].append({"x":snakePos.x, "y":snakePos.y})
     for snake in challengers:
+        snakeGrowth = False
+        snakePos = point(snake['body']['data'][0]['x'], \
+                snake['body']['data'][0]['y'])
+        for candidate in symbols['orth']:
+            if (board[snakePos.x + candidate[0]][snakePos.y + candidate[1]] == symbols['food']):
+                snakeGrowth =  True
         for segment in snake['body']['data']:
+            if ((segment == snake['body']['data'][-1]) and (not snakeGrowth)):
+                continue
             board[segment['x']][segment['y']] = symbols['wall']
 
     # find nearest food
