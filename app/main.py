@@ -159,6 +159,8 @@ def move():
         if (snake['id'] != you['id']) and (snake['length'] >= you['length']):
             placeHalo(board,snakePos,symbols['diag'],symbols['slow'])
             placeHalo(board,snakePos,symbols['orth'],symbols['wall'])
+        else if (snake['id'] != you['id']) and (snake['length'] < you['length']):
+            data['food']['data'].append({"x":snakePos.x, "y":snakePos.y})
     for snake in challengers:
         for segment in snake['body']['data']:
             board[segment['x']][segment['y']] = symbols['wall']
