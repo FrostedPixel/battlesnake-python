@@ -4,7 +4,7 @@ import random
 from operator import itemgetter
 
 symbols = {
-    'walls':-1,
+    'wall':-1,
     'empty':0,
     'tough':5,
     'food':10,
@@ -70,7 +70,7 @@ def shortestPath(board, startPoint, endPoint):
             y = clamp(currentPoint.y+dir[1], 0, 9)
             nextPoint = point(x, y)
             newCost = costSoFar[currentPoint] + board[x][y]
-            if board[x][y] != WALL and (nextPoint not in costSoFar or newCost < costSoFar[nextPoint]):
+            if board[x][y] != symbols['wall'] and (nextPoint not in costSoFar or newCost < costSoFar[nextPoint]):
                 costSoFar[nextPoint] = newCost
                 openList.put(nextPoint, newCost + distScore[x][y])
                 cameFrom[nextPoint] = currentPoint
