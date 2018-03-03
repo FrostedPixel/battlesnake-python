@@ -82,7 +82,7 @@ def placeHalo(board, snake, targets, val):
             continue
         board[candidate.x][candidate.y] = val
 
-def shortestPath(board, startPoint, endPoint):
+def shortestPath(board, startPoint, endPoint, earlyReturn = False):
     distScore = [[abs(i - startPoint.x)+abs(j - startPoint.y) for i in range(board.width)] for j in range(board.height)]
 
     cameFrom = {}
@@ -95,6 +95,8 @@ def shortestPath(board, startPoint, endPoint):
 
     while not openList.empty():
         currentPoint = openList.get()
+        if earlyReturn and currentPoint == startPoint:
+            break
         for dir in symbols['orth']:
             x = currentPoint.x+dir[0]
             y = currentPoint.y+dir[1]
@@ -172,7 +174,7 @@ def move():
             endPoint = point(food['x'],food['y'])
 
     # find shortest path to food
-    path = shortestPath(board, startPoint, endPoint)
+    path = shortestPath(board, startPoint, endPoint, True)
     # direction = random.choice(directions)
 
     #print "Sanity check startPoint = " + str(startPoint) + " x,y = " + str(startX) + "," + str(startY)
