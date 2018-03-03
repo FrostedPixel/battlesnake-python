@@ -210,7 +210,9 @@ def move():
         for segment in snake['body']['data']:
             if ((segment == snake['body']['data'][-1]) and (not snakeGrowth)):
                 continue
-            board[segment['x']][segment['y']] = symbols['wall']
+            wallPt = point(segment['x'], segment['y'])
+            if wallPt.testInBoard(board):
+                board[wallPt.x][wallPt.y] = symbols['wall']
 
     # find nearest food
     #    elif (snake['id'] != you['id']) and (snake['length'] < you['length']) and (you['health'] > symbols['HuntThresh']):
