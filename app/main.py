@@ -75,6 +75,16 @@ def removeDeadChallengers(challengers):
             livingSnakes.append(snake)
     return livingSnakes
 
+def genPtHalo(board, snake, targets)
+    outList = []
+    for target in targets:
+        candidate = point(clampValue(snake.x + target[0], 0, board.width - 1), \
+            clampValue(snake.y + target[1], 0, board.height - 1))
+        if (snake == candidate) or (board[candidate.x][candidate.y] == symbols['wall']):
+            continue
+        outList.append(candidate)
+    return outList
+
 def placeHalo(board, snake, targets, val):
     for target in targets:
         candidate = point(clampValue(snake.x + target[0], 0, board.width - 1), \
@@ -153,6 +163,8 @@ def move():
     challengers = data['snakes']['data']
     challengers = removeDeadChallengers(challengers)
 
+    foodList = []
+
     # mark challengers as 'walls' on board
     for snake in challengers:
         snakePos = point(snake['body']['data'][0]['x'], \
@@ -161,6 +173,7 @@ def move():
             placeHalo(board,snakePos,symbols['diag'],symbols['slow'])
             placeHalo(board,snakePos,symbols['orth'],symbols['wall'])
         elif (snake['id'] != you['id']) and (snake['length'] < you['length']) and (you['health'] > symbols['HuntThresh']):
+
             data['food']['data'].append({"x":snakePos.x, "y":snakePos.y})
     for snake in challengers:
         for segment in snake['body']['data']:
