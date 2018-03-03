@@ -176,7 +176,7 @@ def move():
     curPt = startPoint
     iters = 0
     while curPt != endPoint and iters < 50:
-        curPt = testPath[curPt]
+        curPt = path[curPt]
         pathAsList.append(curPt)
         iters += 1
 
