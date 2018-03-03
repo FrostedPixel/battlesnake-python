@@ -86,14 +86,12 @@ def removeDeadChallengers(challengers):
             livingSnakes.append(snake)
     return livingSnakes
 
-def genPtHalo(board, snake, targets):
+def genOpenSpacesAroundHead(board, snake, targets):
     outList = []
     for target in targets:
-        candidate = point(clampValue(snake.x + target[0], 0, board.width - 1), \
-            clampValue(snake.y + target[1], 0, board.height - 1))
-        if (snake == candidate) or (board[candidate.x][candidate.y] == symbols['wall']):
-            continue
-        outList.append(candidate)
+        candidate = point(snake.x + target[0], snake.y + target[1])
+        if candidate.testInBoard(board) and board[candidate.x][candidate.y] != symbols['wall']:
+            outList.append(candidate)
     return outList
 
 def placeHalo(board, snake, targets, val):
@@ -214,6 +212,12 @@ def move():
             if wallPt.testInBoard(board):
                 board[wallPt.x][wallPt.y] = symbols['wall']
 
+    if you['health'] > symbols['HuntThresh']:
+        for snake in challengers:
+            if (snake['length'] < you['length']):
+                snakePos = point(snake['body']['data'][0]['x'], ['body']['data'][0]['y'])
+                for potentialHead in genOpenSpacesAroundHead(board, snakePos, symbols['orth']):
+                    foodList.append(potentialHead)
     # find nearest food
     #    elif (snake['id'] != you['id']) and (snake['length'] < you['length']) and (you['health'] > symbols['HuntThresh']):
     #        data['food']['data'].append({"x":snakePos.x, "y":snakePos.y})
