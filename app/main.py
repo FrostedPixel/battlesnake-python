@@ -21,6 +21,9 @@ class cBoard():
         self.width = len(b)
         self.height = len(b[0])
 
+    def __getitem__(self, id):
+        return self.field[id]
+
     def toString():
         output = ""
         for r in board:
