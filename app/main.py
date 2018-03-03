@@ -177,7 +177,7 @@ def move():
     curPt = startPoint
     iters = 0
     while curPt != endPoint and iters < 50:
-        if curPt not in path
+        if curPt not in path:
             break;
         curPt = path[curPt]
         pathAsList.append(curPt)
