@@ -19,7 +19,7 @@ class cBoard(b):
     def __init__(b):
         field = b
         width = len(b)
-        height = len(b[])
+        height = len(b[0])
 
     def toString():
         output = ""
