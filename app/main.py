@@ -269,7 +269,7 @@ def move():
 
     return {
         'move': dirToMove,
-        'taunt': str(i)
+        'taunt': str(savedVal)
     }
 
 # Expose WSGI app (so gunicorn can find it)
