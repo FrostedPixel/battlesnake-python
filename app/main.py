@@ -115,7 +115,7 @@ def move():
 
     # get challengers, and remove dead opponents
     challengers = data['snakes']['data']
-    challengers = removeDeadChallengers(challangers)
+    challengers = removeDeadChallengers(challengers)
 
     # mark challengers as 'walls' on board
     for snake in challengers:
