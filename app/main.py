@@ -91,7 +91,7 @@ def start():
     data = bottle.request.json
     return {
         'color': '#00FF00',
-        'taunt': 'Where is the food?',
+        'taunt': 'Where\'s the food?',
         'head_type': 'smile',
         'tail_type': 'regular'
     }
@@ -106,7 +106,7 @@ def move():
     directions = {point(0,-1):'up', point(0,1):'down', point(-1,0):'left', point(1,0):'right'}
 
     you = data['you']
-    startPoint = point(int((you['body']['data']['x']),int(you['body']['data']['y'])))
+    startPoint = point((int(you['body']['data']['x']),int(you['body']['data']['y'])))
 
     # generate board, and fill with movement cost of '1'
     board = [[1 for x in range(data['width'])] for y in range(['height'])]
@@ -118,18 +118,18 @@ def move():
     # mark challengers as 'walls' on board
     for snake in challengers:
         if (snake['id'] != you['id']) and (snake['length'] >= you['length']):
-            for wall in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
-                board[snake.x + wall.x][snake.y + wall.y] = symbols['wall']
+            for wall in [point(0, 1), point(0, -1), point(1, 0), point(-1, 0)]:
+                board[int(snake['body']['data'][0]['x']) + wall.x][int(snake['body']['data'][0]['y']) + wall.y] = symbols['wall']
             for tough in [(1, 1), (-1, -1), (1, -1), (-1, 1)]:
-                board[snake.x + wall.x][snake.y + wall.y] = symbols['tough']
+                board[int(snake['body']['data'][0]['x']) + wall.x][int(snake['body']['data'][0]['y']) + wall.y] = symbols['tough']
         for segment in snake['body']['data']:
-            board[segment['x']][segment['y']] = symbols['wall']
+            board[int(segment['x'])][int(segment['y'])] = symbols['wall']
 
     # find nearest food
-    endPoint = point(int((data['food']['data']['x']),int(data['food']['data']['y'])))
+    endPoint = point((int(data['food']['data']['x']),int(data['food']['data']['y'])))
     distanceToFood = abs(endPoint - startPoint)
     for food in data['food']['data']:
-        currentDistance = abs(endPoint - point(int((food['data']['x']),int(food['data']['y']))))
+        currentDistance = abs(endPoint - point((int(food['data']['x']),int(food['data']['y']))))
         if (currentDistance < distanceToFood):
             distanceToFood = currentDistance
             endPoint = food
