@@ -55,7 +55,7 @@ def removeDeadChallengers(challengers):
     return livingSnakes
 
 def shortestPath(board, startPoint, endPoint):
-    distScore = [[abs(i - startPoint.x)+abs(j - startPoint.y) for i in range(len(board[0]))] for j in range(len(board[0][0]))]
+    distScore = [[abs(i - startPoint.x)+abs(j - startPoint.y) for i in range(len(board))] for j in range(len(board[0]))]
 
     cameFrom = {}
     costSoFar = {}
@@ -72,8 +72,8 @@ def shortestPath(board, startPoint, endPoint):
 
         currentPoint = openList.get()
         for dir in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
-            x = clamp(currentPoint.x+dir[0], 0, len(board[0]))
-            y = clamp(currentPoint.y+dir[1], 0, len(board[0][0]))
+            x = clamp(currentPoint.x+dir[0], 0, len(board))
+            y = clamp(currentPoint.y+dir[1], 0, len(board[0]))
             nextPoint = point(x, y)
             newCost = costSoFar[currentPoint] + board[x][y]
             if board[x][y] != symbols['wall'] and (nextPoint not in costSoFar or newCost < costSoFar[nextPoint]):
