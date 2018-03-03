@@ -174,7 +174,7 @@ def move():
             endPoint = point(food['x'],food['y'])
 
     # find shortest path to food
-    path = shortestPath(board, startPoint, endPoint, True)
+    path = shortestPath(board, startPoint, endPoint, False)
     # direction = random.choice(directions)
 
     #print "Sanity check startPoint = " + str(startPoint) + " x,y = " + str(startX) + "," + str(startY)
