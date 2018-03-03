@@ -54,7 +54,7 @@ class point(tuple):
         return point(self.x - other.x, self.y - other.y)
 
     def testInBoard(self, board):
-        return self.x <= board.width  - 1 and self.y <= board.height - 1
+        return self.x <= board.width  - 1 and self.x >= 0 and self.y <= board.height - 1 and self.y >= 0
 
 def clampValue(val, min, max):
     if val < min:
@@ -98,11 +98,9 @@ def shortestPath(board, startPoint, endPoint):
         for dir in symbols['orth']:
             x = currentPoint.x+dir[0]
             y = currentPoint.y+dir[1]
-            if (x > board.width  - 1) or (y > board.height - 1):
-                continue
             nextPoint = point(x, y)
-            #if not (nextPoint.testInBoard(board)):
-            #    continue
+            if not (nextPoint.testInBoard(board)):
+                continue
             newCost = costSoFar[currentPoint] + board[x][y]
             if (board[x][y] != symbols['wall'] or nextPoint == startPoint) and (nextPoint not in costSoFar or newCost < costSoFar[nextPoint]):
                 costSoFar[nextPoint] = newCost
