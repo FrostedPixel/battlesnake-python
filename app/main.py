@@ -15,6 +15,16 @@ symbols = {
     'HuntThresh':25,
     }
 
+head_list = [
+        'smile',
+        'fang'
+        ]
+
+taunt_list = [
+        'Hello',
+        'World'
+        ]
+
 class cBoard():
     field = []
     width = 0
@@ -248,9 +258,19 @@ def move():
         print "Uhoh key not in directions we gonna die"
         dirToMove = 'right'
 
+    # head code
+    if (distanceToFood < 5):
+        head_type = head_list[(data['turn'] % 2)]
+    else:
+        head_type = head_list[0]
+
+    # taunt code
+    taunt_type = taunt_list[((data['turn'] / 10 )% (len(taunt_list) - 1))]
+
     return {
         'move': dirToMove,
-        'taunt': 'battlesnake-python!'
+        'head_type': head_type,
+        'taunt': taunt_type
     }
 
 # Expose WSGI app (so gunicorn can find it)
