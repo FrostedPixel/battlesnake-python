@@ -98,9 +98,11 @@ def shortestPath(board, startPoint, endPoint):
         for dir in symbols['orth']:
             x = currentPoint.x+dir[0]
             y = currentPoint.y+dir[1]
-            nextPoint = point(x, y)
-            if not (nextPoint.testInBoard(board)):
+            if (x > board.width  - 1) or (y > board.height - 1):
                 continue
+            nextPoint = point(x, y)
+            #if not (nextPoint.testInBoard(board)):
+            #    continue
             newCost = costSoFar[currentPoint] + board[x][y]
             if (board[x][y] != symbols['wall'] or nextPoint == startPoint) and (nextPoint not in costSoFar or newCost < costSoFar[nextPoint]):
                 costSoFar[nextPoint] = newCost
