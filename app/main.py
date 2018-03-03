@@ -163,6 +163,7 @@ def end():
 savedVal = 1
 @bottle.post('/move')
 def move():
+    global savedVal
     savedVal += 1
     data = bottle.request.json
     directions = {point(0,-1):'up', point(0,1):'down', point(-1,0):'left', point(1,0):'right'}
