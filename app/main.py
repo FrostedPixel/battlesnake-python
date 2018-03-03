@@ -76,7 +76,7 @@ def removeDeadChallengers(challengers):
             livingSnakes.append(snake)
     return livingSnakes
 
-def genPtHalo(board, snake, targets)
+def genPtHalo(board, snake, targets):
     outList = []
     for target in targets:
         candidate = point(clampValue(snake.x + target[0], 0, board.width - 1), \
