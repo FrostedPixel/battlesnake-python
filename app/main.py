@@ -7,6 +7,7 @@ from operator import itemgetter
 symbols = {
     'wall':-1,
     'empty':0,
+    'defCost':1,
     'slow':5,
     'food':10,
     'orth':[(0,1),(1,0),(0,-1),(-1,0)],
@@ -93,7 +94,7 @@ def placeHalo(board, snake, targets, val):
             continue
         board[candidate.x][candidate.y] = val
 
-def shortestPath(board, startPoint, endPoint, earlyReturn = False):
+def shortestPath(board, costBoard, startPoint, endPoint, earlyReturn = False):
     distScore = [[abs(i - startPoint.x)+abs(j - startPoint.y) for i in range(board.width)] for j in range(board.height)]
 
     cameFrom = {}
@@ -112,9 +113,9 @@ def shortestPath(board, startPoint, endPoint, earlyReturn = False):
             x = currentPoint.x+dir[0]
             y = currentPoint.y+dir[1]
             nextPoint = point(x, y)
-            if not (nextPoint.testInBoard(board)):
+            if not (nextPoint.testInBoard(costBoard) and nextPoint.testInBoard(board)):
                 continue
-            newCost = costSoFar[currentPoint] + board[x][y]
+            newCost = costSoFar[currentPoint] + costBoard[x][y]
             if (board[x][y] != symbols['wall'] or nextPoint == startPoint) and (nextPoint not in costSoFar or newCost < costSoFar[nextPoint]):
                 costSoFar[nextPoint] = newCost
                 openList.put(nextPoint, newCost + distScore[x][y])
@@ -162,8 +163,10 @@ def move():
     startPoint = point(startX, startY)
 
     # generate board, and fill with movement cost of '1'
-    field = [[1 for x in range(int(data['width']))] for y in range(int(data['height']))]
-    board = cBoard(field)
+    boardField = [[symbols['empty'] for x in range(int(data['width']))] for y in range(int(data['height']))]
+    board = cBoard(boardField)
+    costField = [[symbols['defCost'] for x in range(int(data['width']))] for y in range(int(data['height']))]
+    costBoard = cBoard(costField)
 
     # get challengers, and remove dead opponents
     challengers = data['snakes']['data']
@@ -172,20 +175,28 @@ def move():
     foodList = []
 
     # mark challengers as 'walls' on board
-    for snake in challengers:
-        snakePos = point(snake['body']['data'][0]['x'], \
-                snake['body']['data'][0]['y'])
-        if (snake['id'] != you['id']) and (snake['length'] >= you['length']):
-            placeHalo(board,snakePos,symbols['diag'],symbols['slow'])
-            placeHalo(board,snakePos,symbols['orth'],symbols['wall'])
-        elif (snake['id'] != you['id']) and (snake['length'] < you['length']) and (you['health'] > symbols['HuntThresh']):
+    #for snake in challengers:
+    #    snakePos = point(snake['body']['data'][0]['x'], \
+    #            snake['body']['data'][0]['y'])
+    #    if (snake['id'] != you['id']) and (snake['length'] >= you['length']):
+    #        placeHalo(board,snakePos,symbols['diag'],symbols['slow'])
+    #        placeHalo(board,snakePos,symbols['orth'],symbols['wall'])
+    #    elif (snake['id'] != you['id']) and (snake['length'] < you['length']) and (you['health'] > symbols['HuntThresh']):
+    #        data['food']['data'].append({"x":snakePos.x, "y":snakePos.y})
 
-            data['food']['data'].append({"x":snakePos.x, "y":snakePos.y})
+    # Add food to board
+    for food in data['food']['data']:
+        board[food['x']][food['y']] = symbols['food']
+        foodList.append(point(food['x'], food['y']))
+
     for snake in challengers:
         snakeGrowth = False
         snakePos = point(snake['body']['data'][0]['x'], \
                 snake['body']['data'][0]['y'])
         for candidate in symbols['orth']:
+            testPt (snakePos.x + candidate[0], snakePos.y + candidate[1])
+            if not (testPt.testInBoard(board)):
+                continue
             if (board[snakePos.x + candidate[0]][snakePos.y + candidate[1]] == symbols['food']):
                 snakeGrowth =  True
         for segment in snake['body']['data']:
@@ -204,7 +215,7 @@ def move():
             endPoint = point(food['x'],food['y'])
 
     # find shortest path to food
-    path = shortestPath(board, startPoint, endPoint, False)
+    path = shortestPath(board, costBoard, startPoint, endPoint, False)
     # direction = random.choice(directions)
 
     #print "Sanity check startPoint = " + str(startPoint) + " x,y = " + str(startX) + "," + str(startY)
