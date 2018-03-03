@@ -169,9 +169,12 @@ def move():
     # find shortest path to food
     path = shortestPath(board, startPoint, endPoint)
     # direction = random.choice(directions)
+    printDic(path)
+    firstSquare = path[startPoint]
+
 
     return {
-        'move': directions[path[startPoint]  - startPoint],
+        'move': directions[firstSquare  - startPoint],
         'taunt': 'battlesnake-python!'
     }
 
