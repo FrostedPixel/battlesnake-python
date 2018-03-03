@@ -1,50 +1,13 @@
 import bottle
 import os
 import random
-import numpy
 
-WALL  = -1
-EMPTY = 0
-FOOD  = 10
-
-def calculateZones(width, height, snake, challengers):
-    zones = numpy.zeroes((width,height))
-    return zones
-
-def calculateWeights(width, height, challengers, food):
-    weights = numpy.zeroes((width,height))
-    return weights
-
-def removeDeadChallengers(challengers):
-    livingSnakes = []
-    for x in range(len(challengers)):
-        if challengers[x]['health'] > 0:
-            livingSnakes.append(challengers[x])
-    return livingSnakes
-
-@bottle.route('/')
-def static():
-    return "the server is running"
-
-
-@bottle.route('/static/<path:path>')
-def static(path):
-    return bottle.static_file(path, root='static/')
-
-
-@bottle.post('/start')
-def start():
-    data = bottle.request.json
-    return {
-        'color': '#00FF00',
-        'taunt': 'Where is the food?',
-        'head_type': 'smile',
-        'tail_type': 'regular'
+symbols = {
+    'walls':-1,
+    'empty':0,
+    'tough':5,
+    'food':10,
     }
-
-@bottle.post('/end')
-def end():
-    return "ack"
 
 class point(tuple):
     __slots__ = []
@@ -77,59 +40,106 @@ def printDic(dic):
     for key,value in dic.items():
         print "key " + str(key) + " : val " + str(value)
 
-def shortestPath(board, startPt, goal):
-    FSCORE = [[abs(i - startPt.x)+abs(j - startPt.y) for i in range(10)] for j in range(10)]
-    for i in range(10):
-        for j in range(10):
-            if board[i][j] == WALL:
-                FSCORE[i][j] = 10000
-    # could replace with otheer weights if want to avoid snake heads
-    # read this as costs 1 turn to make a move (could switch with 1 in our or small enenmy zone and 3 in big enenmy zone or w/e)
-    GWEGIHT = [[1 for i in range(10)] for j in range(10)]
-    came_from = {}
-    cost_so_far = {}
-    came_from[goal] = None
+def removeDeadChallengers(challengers):
+    livingSnakes = []
+    for snake in challengers:
+        if snake['health'] > 0:
+            livingSnakes.append(snake)
+    return livingSnakes
 
-    cost_so_far[goal] = 0
+def shortestPath(board, startPoint, endPoint):
+    distScore = [[abs(i - startPoint.x)+abs(j - startPoint.y) for i in range(len(board[0]))] for j in range(len(board[0][0]))]
+
+    cameFrom = {}
+    costSoFar = {}
+    cameFrom[endPoint] = None
+
+    costSoFar[endPoint] = 0
     openList = PriorityQueue()
-    openList.put(goal, 0)
+    openList.put(endPoint, 0)
 
     iters = 0
 
     while not openList.empty():
         iters += 1
 
-        curPt = openList.get()
+        currentPoint = openList.get()
         for dir in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
-            x = clamp(curPt.x+dir[0], 0, 9)
-            y = clamp(curPt.y+dir[1], 0, 9)
-            nextPt = point(x, y)
-            newCost = cost_so_far[curPt] + GWEGIHT[x][y]
-            if board[x][y] != WALL and (nextPt not in cost_so_far or newCost < cost_so_far[nextPt]):
-                cost_so_far[nextPt] = newCost
-                openList.put(nextPt, newCost + FSCORE[x][y])
-                came_from[nextPt] = curPt
-    return came_from
+            x = clamp(currentPoint.x+dir[0], 0, 9)
+            y = clamp(currentPoint.y+dir[1], 0, 9)
+            nextPoint = point(x, y)
+            newCost = costSoFar[currentPoint] + board[x][y]
+            if board[x][y] != WALL and (nextPoint not in costSoFar or newCost < costSoFar[nextPoint]):
+                costSoFar[nextPoint] = newCost
+                openList.put(nextPoint, newCost + distScore[x][y])
+                cameFrom[nextPoint] = currentPoint
+    return cameFrom
+
+@bottle.route('/')
+def static():
+    return "the server is running"
+
+
+@bottle.route('/static/<path:path>')
+def static(path):
+    return bottle.static_file(path, root='static/')
+
+
+@bottle.post('/start')
+def start():
+    data = bottle.request.json
+    return {
+        'color': '#00FF00',
+        'taunt': 'Where is the food?',
+        'head_type': 'smile',
+        'tail_type': 'regular'
+    }
+
+@bottle.post('/end')
+def end():
+    return "ack"
 
 @bottle.post('/move')
 def move():
     data = bottle.request.json
-    directions = ['up', 'down', 'left', 'right']
+    directions = [point(0,-1):'up', point(0,1):'down', point(-1,0):'left', point(1,0):'right']
 
-    challengers = data.get('snakes').get('data')
+    you = data['you']
+    startPoint = point((you['body']['data']['x'],you['body']['data']['y']))
+
+    # generate board, and fill with movement cost of '1'
+    board = [[1 for x in range(data['width'])] for y in range(['height'])]
+
+    # get challengers, and remove dead opponents
+    challengers = data['snakes']['data']
     challengers = removeDeadChallengers(challangers)
 
-    board = numpy.zeroes((data.get('width'),data.get('height')))
-    zones = calculateZones(data.get('width'), data.get('height'), data.get('you'), challengers)
-    weights = calculateWeights(data.get('width'), data.get('height'), challengers, data.get('food'))
-    board = zones * weight
+    # mark challengers as 'walls' on board
+    for snake in challengers:
+        if (snake['id'] != you['id']) and (snake['length'] >= you['length']):
+            for wall in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+                board[snake.x + wall.x][snake.y + wall.y] = symbols['wall']
+            for tough in [(1, 1), (-1, -1), (1, -1), (-1, 1)]:
+                board[snake.x + wall.x][snake.y + wall.y] = symbols['tough']
+        for segment in snake['body']['data']:
+            board[segment['x']][segment['y']] = symbols['wall']
 
-    # TODO: Do things with data
+    # find nearest food
+    endPoint = point((data['food']['data']['x'],data['food']['data']['y']))
+    distanceToFood = abs(endPoint - startPoint)
+    for food in data['food']['data']:
+        currentDistance = abs(endPoint - point((food['data']['x'],food['data']['y'])))
+        if (currentDistance < distanceToFood):
+            distanceToFood = currentDistance
+            endPoint = food
 
-    direction = random.choice(directions)
+    # find shortest path to food
+    path = shortestPath(board, startPoint, endPoint)
+
+    # direction = random.choice(directions)
 
     return {
-        'move': direction,
+        'move': directions[point(path[0].x - startPoint.x, path[0].y - startPoint.y)],
         'taunt': 'battlesnake-python!'
     }
 
