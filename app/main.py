@@ -194,7 +194,7 @@ def move():
         snakePos = point(snake['body']['data'][0]['x'], \
                 snake['body']['data'][0]['y'])
         for candidate in symbols['orth']:
-            testPt (snakePos.x + candidate[0], snakePos.y + candidate[1])
+            testPt = point(snakePos.x + candidate[0], snakePos.y + candidate[1])
             if not (testPt.testInBoard(board)):
                 continue
             if (board[snakePos.x + candidate[0]][snakePos.y + candidate[1]] == symbols['food']):
