@@ -260,27 +260,15 @@ def move():
         print "Uhoh key not in directions we gonna die"
         dirToMove = 'right'
 
-    # head code
-    if (distanceToFood < 5):
-        head_type = head_list[(data['turn'] % 2)]
-    else:
-        head_type = head_list[0]
-
-    # taunt code
-    taunt_type = taunt_list[((data['turn'] / 10 )% (len(taunt_list) - 1))]
-
     return {
         'move': dirToMove,
-        'head_type': head_type,
-        'taunt': taunt_type
+        'taunt': "Kept you waiting huh?"
     }
 
 # Expose WSGI app (so gunicorn can find it)
 application = bottle.default_app()
 
 if __name__ == '__main__':
-    field = [[1 for i in range(10)] for j in range(10)]
-    test = cBoard(field)
     bottle.run(
         application,
         host=os.getenv('IP', '0.0.0.0'),
