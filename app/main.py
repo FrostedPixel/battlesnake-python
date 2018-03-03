@@ -170,7 +170,7 @@ def move():
     path = shortestPath(board, startPoint, endPoint)
     # direction = random.choice(directions)
 
-    print "Sanity check startPoint = " + str(startPoint) + " x,y = " + startX + "," + startY
+    print "Sanity check startPoint = " + str(startPoint) + " x,y = " + str(startX) + "," + str(startY)
 
     path = []
     curPt = startPoint
