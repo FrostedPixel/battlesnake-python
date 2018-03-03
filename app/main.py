@@ -73,8 +73,8 @@ def removeDeadChallengers(challengers):
 
 def placeHalo(board, snake, targets, val):
     for target in targets:
-        candidate = point(clampValue(snake.x + target[0], 0, board.width), \
-            clampValue(snake.y + target[1], 0, board.height))
+        candidate = point(clampValue(snake.x + target[0], 0, board.width - 1), \
+            clampValue(snake.y + target[1], 0, board.height - 1))
         if (snake == candidate):
             continue
         board[candidate.x][candidate.y] = val
@@ -93,8 +93,8 @@ def shortestPath(board, startPoint, endPoint):
     while not openList.empty():
         currentPoint = openList.get()
         for dir in symbols['orth']:
-            x = clampValue(currentPoint.x+dir[0], 0, board.width)
-            y = clampValue(currentPoint.y+dir[1], 0, board.height)
+            x = clampValue(currentPoint.x+dir[0], 0, board.width  - 1)
+            y = clampValue(currentPoint.y+dir[1], 0, board.height - 1)
             nextPoint = point(x, y)
             newCost = costSoFar[currentPoint] + board[x][y]
             if board[x][y] != symbols['wall'] and (nextPoint not in costSoFar or newCost < costSoFar[nextPoint]):
