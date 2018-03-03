@@ -97,7 +97,7 @@ def shortestPath(board, startPoint, endPoint):
             y = clampValue(currentPoint.y+dir[1], 0, board.height - 1)
             nextPoint = point(x, y)
             newCost = costSoFar[currentPoint] + board[x][y]
-            if board[x][y] != symbols['wall'] and (nextPoint not in costSoFar or newCost < costSoFar[nextPoint]):
+            if (board[x][y] != symbols['wall'] or nextPoint == startPoint) and (nextPoint not in costSoFar or newCost < costSoFar[nextPoint]):
                 costSoFar[nextPoint] = newCost
                 openList.put(nextPoint, newCost + distScore[x][y])
                 cameFrom[nextPoint] = currentPoint
@@ -185,7 +185,7 @@ def move():
         pathAsList.append(curPt)
         iters += 1
 
-    #print pathAsList
+    print "Path = ", pathAsList
 
     if startPoint in path:
         firstSquare = path[startPoint]
@@ -196,6 +196,7 @@ def move():
     if squareToMoveTo in directions:
         dirToMove = directions[squareToMoveTo]
     else:
+        print "Uhoh key not in directions we gonna die"
         dirToMove = 'right'
 
     return {
