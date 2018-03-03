@@ -1,6 +1,7 @@
 import bottle
 import os
 import random
+import operator
 
 symbols = {
     'walls':-1,
