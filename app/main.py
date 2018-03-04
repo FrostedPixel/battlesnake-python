@@ -68,6 +68,12 @@ class point(tuple):
     def testInBoard(self, board):
         return self.x <= board.width  - 1 and self.x >= 0 and self.y <= board.height - 1 and self.y >= 0
 
+def closeToWall(board, pos, thresh):
+    return pos.x - thresh <= 0 or \
+           pos.y - thresh <= 0 or \
+           pos.x + thresh > board.width  + 1 or \
+           pos.y + thresh > board.height + 1
+
 def clampValue(val, min, max):
     if val < min:
         return min
@@ -212,7 +218,7 @@ def move():
             if wallPt.testInBoard(board):
                 board[wallPt.x][wallPt.y] = symbols['wall']
 
-    if you['health'] > symbols['HuntThresh']:
+    if (you['health'] > symbols['HuntThresh']) and (not closeToWall(board, startPoint, 2)):
         for snake in challengers:
             if (snake['length'] < you['length']):
                 snakePos = point(snake['body']['data'][0]['x'], snake['body']['data'][0]['y'])
