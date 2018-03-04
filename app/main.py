@@ -202,7 +202,10 @@ def move():
         if (you['health'] <= symbols['HuntThresh']) or (not closeToWall(board, foodPt, 2)):
             foodList.append(foodPt)
         board[food['x']][food['y']] = symbols['food']
-
+    if foodList.empty():
+        for food in data['food']['data']:
+            foodPt = point(food['x'], food['y'])
+            foodList.append(foodPt)
 
     for snake in challengers:
         snakeGrowth = False
@@ -232,13 +235,14 @@ def move():
     # find nearest food
     #    elif (snake['id'] != you['id']) and (snake['length'] < you['length']) and (you['health'] > symbols['HuntThresh']):
     #        data['food']['data'].append({"x":snakePos.x, "y":snakePos.y})
-    endPoint = foodList[0]
-    distanceToFood = (abs(endPoint.x - startPoint.x) + abs(endPoint.y - startPoint.y))
-    for food in foodList:
-        currentDistance = (abs(startPoint.x - food.x) + abs(startPoint.y - food.y))
-        if (currentDistance < distanceToFood):
-            distanceToFood = currentDistance
-            endPoint = food
+    if not foodList.empty():
+        endPoint = foodList[0]
+        distanceToFood = (abs(endPoint.x - startPoint.x) + abs(endPoint.y - startPoint.y))
+        for food in foodList:
+            currentDistance = (abs(startPoint.x - food.x) + abs(startPoint.y - food.y))
+            if (currentDistance < distanceToFood):
+                distanceToFood = currentDistance
+                endPoint = food
 
     # find shortest path to food
     path = shortestPath(board, costBoard, startPoint, endPoint, False)
