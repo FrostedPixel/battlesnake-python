@@ -160,10 +160,6 @@ def start():
 def end():
     return "ack"
 
-
-def calcZoneScore()
-
-
 @bottle.post('/move')
 def move():
     data = bottle.request.json
