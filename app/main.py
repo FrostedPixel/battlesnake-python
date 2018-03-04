@@ -198,8 +198,11 @@ def move():
 
     # Add food to board
     for food in data['food']['data']:
+        foodPt = point(food['x'], food['y'])
+        if (you['health'] <= symbols['HuntThresh']) or (not closeToWall(board, foodPt, 2)):
+            foodList.append(foodPt)
         board[food['x']][food['y']] = symbols['food']
-        foodList.append(point(food['x'], food['y']))
+
 
     for snake in challengers:
         snakeGrowth = False
