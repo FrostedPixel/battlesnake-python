@@ -160,11 +160,12 @@ def start():
 def end():
     return "ack"
 
-savedVal = 1
+
+def calcZoneScore()
+
+
 @bottle.post('/move')
 def move():
-    global savedVal
-    savedVal += 1
     data = bottle.request.json
     directions = {point(0,-1):'up', point(0,1):'down', point(-1,0):'left', point(1,0):'right'}
 
@@ -190,7 +191,7 @@ def move():
         snakePos = point(snake['body']['data'][0]['x'], \
                 snake['body']['data'][0]['y'])
         if (snake['id'] != you['id']) and (snake['length'] >= you['length']):
-            #placeHalo(board,snakePos,symbols['diag'],symbols['slow'])
+            placeHalo(costBoard,snakePos,symbols['diag'],symbols['slow'])
             placeHalo(board,snakePos,symbols['orth'],symbols['wall'])
 
     # Add food to board
@@ -269,7 +270,7 @@ def move():
 
     return {
         'move': dirToMove,
-        'taunt': str(savedVal)
+        'taunt': "Kept you waiting huh?"
     }
 
 # Expose WSGI app (so gunicorn can find it)
