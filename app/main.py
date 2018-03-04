@@ -225,6 +225,8 @@ def move():
         for snake in challengers:
             if (snake['length'] < you['length']):
                 snakePos = point(snake['body']['data'][0]['x'], snake['body']['data'][0]['y'])
+                if closeToWall(board, snakePos, 2):
+                    continue
                 for potentialHead in genOpenSpacesAroundHead(board, snakePos, symbols['orth']):
                     foodList.append(potentialHead)
     # find nearest food
