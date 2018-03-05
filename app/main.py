@@ -236,7 +236,7 @@ def move():
     # find nearest food
     #    elif (snake['id'] != you['id']) and (snake['length'] < you['length']) and (you['health'] > symbols['HuntThresh']):
     #        data['food']['data'].append({"x":snakePos.x, "y":snakePos.y})
-    if not foodList.empty():
+    if foodList:
         endPoint = foodList[0]
         distanceToFood = (abs(endPoint.x - startPoint.x) + abs(endPoint.y - startPoint.y))
         for food in foodList:
