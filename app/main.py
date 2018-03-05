@@ -202,7 +202,7 @@ def move():
         if (you['health'] <= symbols['HuntThresh']) or (not closeToWall(board, foodPt, 2)):
             foodList.append(foodPt)
         board[food['x']][food['y']] = symbols['food']
-    if foodList.empty():
+    if not foodList:
         for food in data['food']['data']:
             foodPt = point(food['x'], food['y'])
             foodList.append(foodPt)
