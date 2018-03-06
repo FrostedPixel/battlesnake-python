@@ -220,8 +220,8 @@ def move():
     # If foodList is empty, provide all the food as an option (does not handle no-food games)
     if not foodList:
         for food in data['food']['data']:
-        foodLocation = [food['x'], food['y']]
-        foodList.append(foodLocation)
+            foodLocation = [food['x'], food['y']]
+            foodList.append(foodLocation)
 
     # Find nearest food/prey to our head
     target = foodList[0]
