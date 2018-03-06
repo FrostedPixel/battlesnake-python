@@ -119,7 +119,7 @@ def shortestPath(obstacles, travelWeights, startPoint, endPoint, earlyReturn = F
         currentPoint = openList.get()
         if earlyReturn and currentPoint == startPoint:
             break
-        for dir in DIRECTIONS['ortho'])
+        for dir in DIRECTIONS['ortho']:
             x = currentPoint[xpos]+dir[xpos]
             y = currentPoint[ypos]+dir[ypos]
             nextPoint = (x, y)
