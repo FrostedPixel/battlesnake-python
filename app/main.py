@@ -51,11 +51,11 @@ class cBoard():
 class cSnake():
     _map = {}
     def __init__(self, s):
-        self._map['id'] = s['data']['id']
-        self._map['health'] = s['data']['health']
-        self._map['length'] = s['data']['length']
-        self._map['name'] = s['data']['name']
-        self._map['body'] = [(p['x'],p['y']) for p in s['data']['body']['data']]
+        self._map['id'] = s['id']
+        self._map['health'] = s['health']
+        self._map['length'] = s['length']
+        self._map['name'] = s['name']
+        self._map['body'] = [(p['x'],p['y']) for p in s['body']['data']]
         self._map['head'] = self._map['body'][0]
         self._map['tail'] = self._map['body'][-1]
         
