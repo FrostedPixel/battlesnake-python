@@ -55,7 +55,7 @@ class cSnake():
         self._map['health'] = s['health']
         self._map['length'] = s['length']
         self._map['name'] = s['name']
-        self._map['body'] = [[p['x'],p['y']] for p in s['body']['data']]
+        self._map['body'] = ([p['x'],p['y']) for p in s['body']['data']]
         self._map['head'] = self._map['body'][0]
         self._map['tail'] = self._map['body'][-1]
         
@@ -99,7 +99,7 @@ def listOpenSpaces(board, snake, targets):
 def placeHalo(board, snake, targets, val):
     for target in targets:
         candidate = numpy.add(snake, target)
-        candidate = [clampValue(candidate[xpos], 0, board.width - 1), clampValue(candidate[ypos], 0, board.height - 1)]
+        candidate = (clampValue(candidate[xpos], 0, board.width - 1), clampValue(candidate[ypos], 0, board.height - 1))
         if (snake == candidate):
             continue
         board[candidate[xpos]][candidate[ypos]] = val
@@ -180,7 +180,7 @@ def move():
 
     # Add food to obstacleMap
     for food in data['food']['data']:
-        foodLocation = [food['x'], food['y']]
+        foodLocation = (food['x'], food['y'])
         if (ourSnake['health'] <= symbols['starveTrigger']) or (not closeToWall(obstacleMap, foodLocation, 2)):
             foodList.append(foodLocation)
             obstacleMap[food['x']][food['y']] = CELL_VALUES['food']
@@ -220,7 +220,7 @@ def move():
     # If foodList is empty, provide all the food as an option (does not handle no-food games)
     if not foodList:
         for food in data['food']['data']:
-            foodLocation = [food['x'], food['y']]
+            foodLocation = (food['x'], food['y'])
             foodList.append(foodLocation)
 
     # Find nearest food/prey to our head
@@ -238,7 +238,7 @@ def move():
     # direction = random.choice(movementOptions)
 
     # Check if a path was found, and set first move to a tile adjacent to head
-    firstMove = [0, 1]
+    firstMove = (0, 1)
     if ourSnake['head'] in path:
         firstMove = path[ourSnake['head']]
     # If a path was not found pick open space around head
