@@ -216,7 +216,7 @@ def move():
 
     # If we are hunting add prey to food list
     if (ourSnake['health'] > symbols['starveTrigger']) and (not closeToWall(obstacleMap, ourSnake['head'], 2)):
-        foodList.append(prey)
+        foodList += preyList
 
     # Find nearest food/prey to our head
     if foodList:
