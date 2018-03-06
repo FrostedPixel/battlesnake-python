@@ -1,8 +1,12 @@
 import bottle
 import os
 import random
+import numpy
 from Queue import PriorityQueue
 from operator import itemgetter
+
+# Constants
+xpos, ypos = 0,1
 
 CELL_VALUES = {
         'wall': -1,
@@ -21,6 +25,7 @@ symbols = {
     'HuntThresh':25,
     }
 
+# Classes
 class cBoard():
     field = []
     width = 0
@@ -33,6 +38,9 @@ class cBoard():
     def __getitem__(self, id):
         return self.field[id]
 
+    def testInBounds(self, pos):
+        return (pos[xpos] in range(0,self.width)) and (pos[ypos] in range(0,self.height))
+
     def toString():
         output = ""
         for r in board:
@@ -41,34 +49,11 @@ class cBoard():
             output += '\n'
         return output
 
-class point(tuple):
-    __slots__ = []
-    def __new__(cls, x, y):
-        return tuple.__new__(cls, (x, y))
-    x = property(itemgetter(0))
-    y = property(itemgetter(1))
-    def __str__(self):
-        if self is not None:
-            return str(self.x) + "," + str(self.y)
-        else:
-            return "noPt"
-    def __eq__(self,other):
-        return self.x == other.x and self.y == other.y
-
-    def __add__(self,other):
-        return point(self.x + other.x, self.y + other.y)
-
-    def __sub__(self,other):
-        return point(self.x - other.x, self.y - other.y)
-
-    def testInBoard(self, board):
-        return self.x <= board.width  - 1 and self.x >= 0 and self.y <= board.height - 1 and self.y >= 0
-
 def closeToWall(board, pos, thresh):
-    return pos.x - thresh <= 0 or \
-           pos.y - thresh <= 0 or \
-           pos.x + thresh > board.width  + 1 or \
-           pos.y + thresh > board.height + 1
+    return pos[xpos] - thresh <= 0 or \
+           pos[ypos] - thresh <= 0 or \
+           pos[xpos] + thresh > board.width  + 1 or \
+           pos[ypos] + thresh > board.height + 1
 
 def clampValue(val, min, max):
     if val < min:
@@ -91,21 +76,20 @@ def removeDeadChallengers(challengers):
 def genOpenSpacesAroundHead(board, snake, targets):
     outList = []
     for target in targets:
-        candidate = point(snake.x + target[0], snake.y + target[1])
-        if candidate.testInBoard(board) and board[candidate.x][candidate.y] != CELL_VALUES['wall']:
+        candidate = (snake[xpos] + target[xpos], snake[ypos] + target[ypos])
+        if board.testInBounds(candidate) and board[candidate.x][candidate.y] != CELL_VALUES['wall']:
             outList.append(candidate)
     return outList
 
 def placeHalo(board, snake, targets, val):
     for target in targets:
-        candidate = point(clampValue(snake.x + target[0], 0, board.width - 1), \
-            clampValue(snake.y + target[1], 0, board.height - 1))
+        candidate = (clampValue(snake[xpos] + target[xpos], 0, board.width - 1), clampValue(snake[ypos] + target[ypos], 0, board.height - 1))
         if (snake == candidate):
             continue
-        board[candidate.x][candidate.y] = val
+        board[candidate[xpos]][candidate[ypos]] = val
 
-def shortestPath(board, costBoard, startPoint, endPoint, earlyReturn = False):
-    distScore = [[abs(i - startPoint.x)+abs(j - startPoint.y) for i in range(board.width)] for j in range(board.height)]
+def shortestPath(obstacles, travelWeights, startPoint, endPoint, earlyReturn = False):
+    distScore = [[abs(i - startPoint[xpos])+abs(j - startPoint[ypos]) for i in range(obstacles.width)] for j in range(obstacles.height)]
 
     cameFrom = {}
     costSoFar = {}
@@ -120,13 +104,13 @@ def shortestPath(board, costBoard, startPoint, endPoint, earlyReturn = False):
         if earlyReturn and currentPoint == startPoint:
             break
         for dir in DIRECTIONS['ortho'])
-            x = currentPoint.x+dir[0]
-            y = currentPoint.y+dir[1]
-            nextPoint = point(x, y)
-            if not (nextPoint.testInBoard(costBoard) and nextPoint.testInBoard(board)):
+            x = currentPoint[xpos]+dir[xpos]
+            y = currentPoint[ypos]+dir[ypos]
+            nextPoint = (x, y)
+            if not (travelWeights.testInBounds(nextPoint) and obstacles.testInBounds(nextPoint)):
                 continue
-            newCost = costSoFar[currentPoint] + costBoard[x][y]
-            if (board[x][y] != CELL_VALUES['wall'] or nextPoint == startPoint) and (nextPoint not in costSoFar or newCost < costSoFar[nextPoint]):
+            newCost = costSoFar[currentPoint] + travelWeights[x][y]
+            if (obstacles[x][y] != CELL_VALUES['wall'] or nextPoint == startPoint) and (nextPoint not in costSoFar or newCost < costSoFar[nextPoint]):
                 costSoFar[nextPoint] = newCost
                 openList.put(nextPoint, newCost + distScore[x][y])
                 cameFrom[nextPoint] = currentPoint
@@ -150,6 +134,7 @@ def start():
                 bottle.request.urlparts.scheme,
                 bottle.request.urlparts.netloc
             )
+    
     return {
         'color': '#00FF00',
         'taunt': 'Where\'s the food?',
@@ -165,18 +150,16 @@ def end():
 @bottle.post('/move')
 def move():
     data = bottle.request.json
-    directions = {point(0,-1):'up', point(0,1):'down', point(-1,0):'left', point(1,0):'right'}
+    movementOptions = {(0,-1):'up', (0,1):'down', (-1,0):'left', (1,0):'right'}
 
     you = data['you']
-    startX = int(you['body']['data'][0]['x'])
-    startY = int(you['body']['data'][0]['y'])
-    startPoint = point(startX, startY)
+    startPoint = (you['body']['data'][0]['x'], you['body']['data'][0]['y'])
 
     # generate board, and fill with movement cost of '1'
-    boardField = [[CELL_VALUES['empty'] for x in range(int(data['width']))] for y in range(int(data['height']))]
-    board = cBoard(boardField)
-    costField = [[symbols['defCost'] for x in range(int(data['width']))] for y in range(int(data['height']))]
-    costBoard = cBoard(costField)
+    obstacleMap = [[CELL_VALUES['empty'] for x in range(int(data['width']))] for y in range(int(data['height']))]
+    obstacleMap = cBoard(obstacleMap)
+    travelMap = [[symbols['defCost'] for x in range(int(data['width']))] for y in range(int(data['height']))]
+    travelMap = cBoard(travelMap)
 
     # get challengers, and remove dead opponents
     challengers = data['snakes']['data']
@@ -184,96 +167,78 @@ def move():
 
     foodList = []
 
-    # mark challengers as 'walls' on board
+    # mark challengers as 'walls' on obstacleMap
     for snake in challengers:
-        snakePos = point(snake['body']['data'][0]['x'], \
-                snake['body']['data'][0]['y'])
+        snakePos = (snake['body']['data'][0]['x'], snake['body']['data'][0]['y'])
         if (snake['id'] != you['id']) and (snake['length'] >= you['length']):
-            placeHalo(costBoard,snakePos,DIRECTIONS['diag'],CELL_VALUES['slow'])
-            placeHalo(board,snakePos,DIRECTIONS['ortho'],CELL_VALUES['wall'])
+            placeHalo(travelMap,snakePos,DIRECTIONS['diag'],CELL_VALUES['slow'])
+            placeHalo(obstacleMap,snakePos,DIRECTIONS['ortho'],CELL_VALUES['wall'])
 
-    # Add food to board
+    # Add food to obstacleMap
     for food in data['food']['data']:
-        foodPt = point(food['x'], food['y'])
-        if (you['health'] <= symbols['HuntThresh']) or (not closeToWall(board, foodPt, 2)):
-            foodList.append(foodPt)
-        board[food['x']][food['y']] = CELL_VALUES['food']
+        foodLocation = (food['x'], food['y'])
+        if (you['health'] <= symbols['HuntThresh']) or (not closeToWall(obstacleMap, foodLocation, 2)):
+            foodList.append(foodLocation)
+        # TODO: remove? not used
+        obstacleMap[food['x']][food['y']] = CELL_VALUES['food']
         print "[{}][{}]\n".format(food['x'], food['y'])
     if not foodList:
         for food in data['food']['data']:
-            foodPt = point(food['x'], food['y'])
-            foodList.append(foodPt)
+            foodLocation = (food['x'], food['y'])
+            foodList.append(foodLocation)
 
     for snake in challengers:
         snakeGrowth = False
-        snakePos = point(snake['body']['data'][0]['x'], \
-                snake['body']['data'][0]['y'])
+        snakePos = (snake['body']['data'][0]['x'], snake['body']['data'][0]['y'])
         for candidate in DIRECTIONS['ortho']:
-            testPt = point(snakePos.x + candidate[0], snakePos.y + candidate[1])
-            if not (testPt.testInBoard(board)):
+            testPt = (snakePos[xpos] + candidate[xpos], snakePos[ypos] + candidate[ypos])
+            if not (obstacleMap.testInBounds(testPt)):
                 continue
-            if (board[snakePos.x + candidate[0]][snakePos.y + candidate[1]] == CELL_VALUES['food']):
+            if (obstacleMap[snakePos[xpos] + candidate[xpos]][snakePos[ypos] + candidate[ypos]] == CELL_VALUES['food']):
                 snakeGrowth =  True
         for segment in snake['body']['data']:
             if ((segment == snake['body']['data'][-1]) and (not snakeGrowth)):
                 continue
-            wallPt = point(segment['x'], segment['y'])
-            if wallPt.testInBoard(board):
-                board[wallPt.x][wallPt.y] = CELL_VALUES['wall']
+            wallPt = (segment['x'], segment['y'])
+            if obstacleMap.testInBounds(wallPt):
+                obstacleMap[wallPt[xpos]][wallPt[ypos]] = CELL_VALUES['wall']
 
-    if (you['health'] > symbols['HuntThresh']) and (not closeToWall(board, startPoint, 2)):
+    if (you['health'] > symbols['HuntThresh']) and (not closeToWall(obstacleMap, startPoint, 2)):
         for snake in challengers:
             if (snake['length'] < you['length']):
-                snakePos = point(snake['body']['data'][0]['x'], snake['body']['data'][0]['y'])
-                if closeToWall(board, snakePos, 2):
+                snakePos = (snake['body']['data'][0]['x'], snake['body']['data'][0]['y'])
+                if closeToWall(obstacleMap, snakePos, 2):
                     continue
-                for potentialHead in genOpenSpacesAroundHead(board, snakePos, DIRECTIONS['ortho']):
+                for potentialHead in genOpenSpacesAroundHead(obstacleMap, snakePos, DIRECTIONS['ortho']):
                     foodList.append(potentialHead)
-    # find nearest food
-    #    elif (snake['id'] != you['id']) and (snake['length'] < you['length']) and (you['health'] > symbols['HuntThresh']):
-    #        data['food']['data'].append({"x":snakePos.x, "y":snakePos.y})
+
     if foodList:
         endPoint = foodList[0]
-        distanceToFood = (abs(endPoint.x - startPoint.x) + abs(endPoint.y - startPoint.y))
+        distanceToFood = (abs(endPoint[xpos] - startPoint[xpos]) + abs(endPoint[ypos] - startPoint[ypos]))
         for food in foodList:
-            currentDistance = (abs(startPoint.x - food.x) + abs(startPoint.y - food.y))
+            currentDistance = (abs(startPoint[xpos] - food[xpos]) + abs(startPoint[ypos] - food[ypos]))
             if (currentDistance < distanceToFood):
                 distanceToFood = currentDistance
                 endPoint = food
 
     # find shortest path to food
-    path = shortestPath(board, costBoard, startPoint, endPoint, False)
-    # direction = random.choice(directions)
+    path = shortestPath(obstacleMap, travelMap, startPoint, endPoint, False)
+    # direction = random.choice(movementOptions)
 
-    #print "Sanity check startPoint = " + str(startPoint) + " x,y = " + str(startX) + "," + str(startY)
-    #print "endPoint " + str(endPoint)
-
-    #pathAsList = []
-    #curPt = startPoint
-    #iters = 0
-    #while curPt != endPoint and iters < 50:
-    #    if curPt not in path:
-    #        #print "break in path!"
-    #        #printDic(path)
-    #        break;
-    #    curPt = path[curPt]
-    #    pathAsList.append(curPt)
-    #    iters += 1
-    #print "Path = ", pathAsList
-    firstSquare = point(0, 1)
+    firstSquare = (0, 1)
     if startPoint in path:
         firstSquare = path[startPoint]
     else:
         for direc in DIRECTIONS['ortho']:
-            potential = point(startPoint.x + direc[0], startPoint.y + direc[1])
-            if potential.testInBoard(board) and board[potential.x][potential.y] != CELL_VALUES['wall']:
+            potential = (startPoint[xpos] + direc[xpos], startPoint[ypos] + direc[ypos])
+            if obstacleMap.testInBounds(potential) and obstacleMap[potential[xpos]][potential[ypos]] != CELL_VALUES['wall']:
                 firstSquare = potential
 
-    squareToMoveTo = firstSquare  - startPoint
-    if squareToMoveTo in directions:
-        dirToMove = directions[squareToMoveTo]
+    squareToMoveTo = numpy.sub(firstSquare, startPoint)
+    if squareToMoveTo in movementOptions:
+        dirToMove = movementOptions[squareToMoveTo]
     else:
-        print "Uhoh key not in directions we gonna die"
+        print "Uhoh key not in movementOptions we gonna die"
         dirToMove = 'right'
 
     return {
