@@ -123,10 +123,10 @@ def shortestPath(obstacles, travelWeights, startPoint, endPoint, earlyReturn = F
             nextPoint = numpy.add(currentPoint, dir)
             if not (travelWeights.testInBounds(nextPoint) and obstacles.testInBounds(nextPoint)):
                 continue
-            newCost = costSoFar[currentPoint] + travelWeights[x][y]
-            if (obstacles[x][y] != CELL_VALUES['wall'] or nextPoint == startPoint) and (nextPoint not in costSoFar or newCost < costSoFar[nextPoint]):
+            newCost = costSoFar[currentPoint] + travelWeights[nextPoint[xpos]][nextPoint[ypos]]
+            if (obstacles[nextPoint[xpos]][nextPoint[ypos]] != CELL_VALUES['wall'] or nextPoint == startPoint) and (nextPoint not in costSoFar or newCost < costSoFar[nextPoint]):
                 costSoFar[nextPoint] = newCost
-                openList.put(nextPoint, newCost + distScore[x][y])
+                openList.put(nextPoint, newCost + distScore[nextPoint[xpos]][nextPoint[ypos]])
                 cameFrom[nextPoint] = currentPoint
     return cameFrom
 
