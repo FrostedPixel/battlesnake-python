@@ -225,9 +225,9 @@ def move():
 
     # Find nearest food/prey to our head
     target = foodList[0]
-    distanceToFood = numpy.linalg.norm(target - ourSnake['head'])
+    distanceToFood = (abs(target[xpos] - ourSnake['head'][xpos]))+(abs(target[ypos] - ourSnake['head'][ypos]))
     for food in foodList:
-        currentDistance = numpy.linalg.norm(food - ourSnake['head'])
+        currentDistance = (abs(food[xpos] - ourSnake['head'][xpos]))+(abs(food[ypos] - ourSnake['head'][ypos]))
         if (currentDistance < distanceToFood):
             distanceToFood = currentDistance
             target = food
