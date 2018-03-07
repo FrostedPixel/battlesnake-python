@@ -107,7 +107,6 @@ def placeHalo(board, snake, targets, val):
 def shortestPath(obstacles, travelWeights, startPoint, endPoint, earlyReturn = False):
     distScore = [[abs(i - startPoint[xpos])+abs(j - startPoint[ypos]) for i in range(obstacles.width)] for j in range(obstacles.height)]
     distScore = cBoard(distScore)
-    print distScore.toString()
 
     cameFrom = {}
     costSoFar = {}
@@ -126,11 +125,9 @@ def shortestPath(obstacles, travelWeights, startPoint, endPoint, earlyReturn = F
             nextPoint = tuple(numpy.add(currentPoint, dir))
             if not (travelWeights.testInBounds(nextPoint) and obstacles.testInBounds(nextPoint)):
                 continue
-            print nextPoint
             newCost = costSoFar[currentPoint] + travelWeights[nextPoint[xpos]][nextPoint[ypos]]
             if (obstacles[nextPoint[xpos]][nextPoint[ypos]] != CELL_VALUES['wall'] or nextPoint == startPoint) and (nextPoint not in costSoFar or newCost < costSoFar[nextPoint]):
                 costSoFar[nextPoint] = newCost
-                print 'nextPoint: (%d,%d)' % (nextPoint[xpos],nextPoint[ypos])
                 openList.put(nextPoint, newCost + distScore[nextPoint[xpos]][nextPoint[ypos]])
                 cameFrom[nextPoint] = currentPoint
     return cameFrom
