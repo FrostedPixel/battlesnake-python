@@ -31,8 +31,8 @@ class cBoard():
     height = 0
     def __init__(self, b):
         self.field = b
-        self.width = len(b)
-        self.height = len(b[0])
+        self.width = len(b[0])
+        self.height = len(b)
 
     def __getitem__(self, id):
         return self.field[id]
@@ -107,7 +107,7 @@ def placeHalo(board, snake, targets, val):
 def shortestPath(obstacles, travelWeights, startPoint, endPoint, earlyReturn = False):
     distScore = [[abs(i - startPoint[xpos])+abs(j - startPoint[ypos]) for i in range(obstacles.width)] for j in range(obstacles.height)]
     distScore = cBoard(distScore)
-    distScore.toString()
+    print distScore.toString()
 
     cameFrom = {}
     costSoFar = {}
