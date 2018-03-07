@@ -91,14 +91,14 @@ def processChallengers(challengers):
 def listOpenSpaces(board, snake, targets):
     outList = []
     for target in targets:
-        candidate = numpy.add(snake, target)
+        candidate = tuple(numpy.add(snake, target))
         if board.testInBounds(candidate) and board[candidate.x][candidate.y] != CELL_VALUES['wall']:
             outList.append(candidate)
     return outList
 
 def placeHalo(board, snake, targets, val):
     for target in targets:
-        candidate = numpy.add(snake, target)
+        candidate = tuple(numpy.add(snake, target))
         candidate = (clampValue(candidate[xpos], 0, board.width - 1), clampValue(candidate[ypos], 0, board.height - 1))
         if (snake == candidate):
             continue
@@ -120,7 +120,7 @@ def shortestPath(obstacles, travelWeights, startPoint, endPoint, earlyReturn = F
         if earlyReturn and currentPoint == startPoint:
             break
         for dir in DIRECTIONS['ortho']:
-            nextPoint = numpy.add(currentPoint, dir)
+            nextPoint = tuple(numpy.add(currentPoint, dir))
             if not (travelWeights.testInBounds(nextPoint) and obstacles.testInBounds(nextPoint)):
                 continue
             newCost = costSoFar[currentPoint] + travelWeights[nextPoint[xpos]][nextPoint[ypos]]
@@ -199,7 +199,7 @@ def move():
                 preyList.append(potentialHead)
         # Check if there is food within one cell of a snakes head
         for candidate in DIRECTIONS['ortho']:
-            testPt = numpy.add(snake['head'], candidate)
+            testPt = tuple(numpy.add(snake['head'], candidate))
             if not (obstacleMap.testInBounds(testPt)):
                 continue
             if (obstacleMap[testPt[xpos]][testPt[ypos]] == CELL_VALUES['food']):
@@ -245,7 +245,7 @@ def move():
     else:
         firstMove = listOpenSpaces(obstacleMap, ourSnake['head'], DIRECTIONS['ortho'])[0]
 
-    nextMove = numpy.sub(firstMove, ourSnake['head'])
+    nextMove = tuple(numpy.sub(firstMove, ourSnake['head']))
     if nextMove in movementOptions:
         dirToMove = movementOptions[nextMove]
     else:
