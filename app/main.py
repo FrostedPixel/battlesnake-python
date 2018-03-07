@@ -40,9 +40,9 @@ class cBoard():
     def testInBounds(self, pos):
         return (pos[xpos] in range(0,self.width)) and (pos[ypos] in range(0,self.height))
 
-    def toString():
+    def toString(self):
         output = ""
-        for r in board:
+        for r in self.field:
             for c in r:
                  output += str(c).zfill(2)
             output += '\n'
