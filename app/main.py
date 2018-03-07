@@ -247,7 +247,7 @@ def move():
     else:
         firstMove = listOpenSpaces(obstacleMap, ourSnake['head'], DIRECTIONS['ortho'])[0]
 
-    nextMove = tuple(numpy.sub(firstMove, ourSnake['head']))
+    nextMove = tuple(numpy.subtract(firstMove, ourSnake['head']))
     if nextMove in movementOptions:
         dirToMove = movementOptions[nextMove]
     else:
