@@ -26,7 +26,7 @@ directions = {
 
 # Classes
 class cPlayfield():
-    _fields = []
+    _fields = {}
     def __init__(self, w, h):
         self.width = w
         self.height = h
