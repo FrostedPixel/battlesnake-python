@@ -42,6 +42,7 @@ class cPlayfield():
                 and (pos[ypos] >= 0 and pos[ypos] < self.height))
 
 class cSnake():
+    _map = {}
     def __init__(self, s):
         self._map['id'] = s['id']
         self._map['health'] = s['health']
