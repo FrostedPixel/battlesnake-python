@@ -1,136 +1,134 @@
 import bottle
 import os
-import random
-import numpy
 from Queue import PriorityQueue
 
 # Constants
-xpos, ypos = 0,1
-
-CELL_VALUES = {
-        'wall': -1,
-        'empty': 0,
-        'slow': 5,
-        'food': 10
+xpos,ypos = 0,1
+cell_value = {
+        'wall':-1,
+        'empty':0,
+        'food':10,
     }
 
-DIRECTIONS = {
-        'ortho':[[0,1],[1,0],[0,-1],[-1,0]],
-        'diag':[[1,1],[-1,-1],[1,-1],[-1,1]]
+movement_cost = {
+        'default':1,
+        'slow':5
     }
 
-symbols = {
-    'defaultCost':1,
-    'starveTrigger':25,
+behaviour_trigger = {
+        'starve':25
     }
+
+directions = {
+        'ortho':[(-1,0),(0,-1),(1,0),(0,1)],
+        'diag': [(-1,1),(-1,-1),(1,-1),(1,1)]
+     }
 
 # Classes
-class cBoard():
-    field = []
-    width = 0
-    height = 0
-    def __init__(self, b):
-        self.field = b
-        self.width = len(b)
-        self.height = len(b[0])
+class cPlayfield():
+    _fields = []
+    def __init__(self, w, h):
+        self.width = w
+        self.height = h
+
+        self._fields['obstacles'] = [[cell_value['empty'] for y in range(h)] for x in range(w)]
+        self._fields['movecosts'] = [[movement_cost['default'] for y in range(h)] for x in range(w)]
 
     def __getitem__(self, id):
-        return self.field[id]
+        return self._fields[id]
 
-    def testInBounds(self, pos):
-        return (pos[xpos] in range(0,self.width)) and (pos[ypos] in range(0,self.height))
-
-    def toString(self):
-        output = ""
-        for r in self.field:
-            for c in r:
-                 output += str(c).zfill(2)
-            output += '\n'
-        return output
+    def inBounds(self, pos):
+        return ((pos[xpos] >= 0 and pos[xpos] < self.width) \
+                and (pos[ypos] >= 0 and pos[ypos] < self.height))
 
 class cSnake():
-    _map = {}
     def __init__(self, s):
         self._map['id'] = s['id']
         self._map['health'] = s['health']
         self._map['length'] = s['length']
         self._map['name'] = s['name']
         self._map['body'] = [(p['x'],p['y']) for p in s['body']['data']]
+        
         self._map['head'] = self._map['body'][0]
         self._map['tail'] = self._map['body'][-1]
-        
+        self._map['starving'] = False
+        if self._map['health'] <= behaviour_trigger['starve']:
+            self._map['starving'] = True
+
     def __getitem__(self, key):
         return self._map[key]
-        
 
 # Helper functions
-def closeToWall(board, pos, thresh):
-    return pos[xpos] - thresh <= 0 or \
-           pos[ypos] - thresh <= 0 or \
-           pos[xpos] + thresh > board.width  + 1 or \
-           pos[ypos] + thresh > board.height + 1
+def processSnakes(snakes):
+    slist = []
+    for s in snakes:
+        if s['health'] > 0:
+            slist.append(cSnake(s))
+    return slist
 
-def clampValue(val, min, max):
-    if val < min:
-        return min
-    if val > max:
-        return max
-    return val
+def processFood(food):
+    flist = []
+    for f in food:
+        flist.append((f['x'],f['y']))
+    return flist
 
-def printDic(dic):
-    for key,value in dic.items():
-        print "key " + str(key) + " : val " + str(value)
+def processPrey(snakes, ourSnake):
+    plist = []
+    for p in snakes:
+        if p['length'] < ourSnake['length']:
+            plist.append((p['head'][xpos],p['head'][ypos]))
+    return plist
 
-def processChallengers(challengers):
-    livingSnakes = []
-    for snake in challengers:
-        if snake['health'] > 0:
-            livingSnakes.append(cSnake(snake))
-    return livingSnakes
+def findNearestFood(food, ourSnake):
+    target = food[0]
+    dist = (food[0][xpos] - ourSnake['head'][xpos]) + (food[0][ypos] - ourSnake['head'][ypos])
+    for f in food:
+        newDist = (f[xpos] - ourSnake['head'][xpos]) + (f[ypos] - ourSnake['head'][ypos])
+        if newDist < dist:
+            dist = newDist
+            target = f
+    return target
 
-def listOpenSpaces(board, snake, targets):
-    outList = []
-    for target in targets:
-        candidate = tuple(numpy.add(snake, target))
-        if board.testInBounds(candidate) and board[candidate.x][candidate.y] != CELL_VALUES['wall']:
-            outList.append(candidate)
-    return outList
+def findNeighbors(pos, directions):
+    c = []
+    for d in directions:
+        c.append((d[xpos] + pos[xpos],d[ypos] + pos[ypos]))
+    return c
 
-def placeHalo(board, snake, targets, val):
-    for target in targets:
-        candidate = tuple(numpy.add(snake, target))
-        candidate = (clampValue(candidate[xpos], 0, board.width - 1), clampValue(candidate[ypos], 0, board.height - 1))
-        if (snake == candidate):
-            continue
-        board[candidate[xpos]][candidate[ypos]] = val
+def placeHalo(playfield, key, pos, targets, value):
+    targets = findNeighbors(pos, targets)
+    for t in targets:
+        if playfield.inBounds(t):
+            playfield[key][t[xpos]][t[ypos]] = value
 
-def shortestPath(obstacles, travelWeights, startPoint, endPoint, earlyReturn = False):
-    distScore = [[abs(j - startPoint[xpos])+abs(i - startPoint[ypos]) for i in range(obstacles.height)] for j in range(obstacles.width)]
-    distScore = cBoard(distScore)
+def findShortestPath(playfield, start, target):
+    distanceScore = [[(abs(x - start[xpos])+abs(y - start[ypos])) for y in range(playfield.height)] for x in range(playfield.width)]
 
-    cameFrom = {}
-    costSoFar = {}
-    
-    cameFrom[endPoint] = None
-    costSoFar[endPoint] = 0
-    
-    openList = PriorityQueue()
-    openList.put(endPoint, 0)
+    prevCells = {}
+    totalCost = {}
 
-    while not openList.empty():
-        currentPoint = openList.get()
-        if earlyReturn and currentPoint == startPoint:
+    prevCells[target] = None
+    totalCost[target] = 0
+
+    openCells = PriorityQueue()
+    openCells.put(target, 0)
+
+    while (not openCells.empty()):
+        currCell = openCells.get()
+        if (currCell == start):
             break
-        for dir in DIRECTIONS['ortho']:
-            nextPoint = tuple(numpy.add(currentPoint, dir))
-            if not (travelWeights.testInBounds(nextPoint) and obstacles.testInBounds(nextPoint)):
+        neighbors = findNeighbors(currCell, directions['ortho'])
+        for n in neighbors:
+            if (not playfield.inBounds(n)):
                 continue
-            newCost = costSoFar[currentPoint] + travelWeights[nextPoint[xpos]][nextPoint[ypos]]
-            if (obstacles[nextPoint[xpos]][nextPoint[ypos]] != CELL_VALUES['wall'] or nextPoint == startPoint) and (nextPoint not in costSoFar or newCost < costSoFar[nextPoint]):
-                costSoFar[nextPoint] = newCost
-                openList.put(nextPoint, newCost + distScore[nextPoint[xpos]][nextPoint[ypos]])
-                cameFrom[nextPoint] = currentPoint
-    return cameFrom
+            if (playfield['obstacles'][n[xpos]][n[ypos]] == cell_value['wall']):
+                continue
+            newCost = totalCost[currCell] + playfield['movecosts'][n[xpos]][n[ypos]]
+            if ((n not in totalCost) or (newCost < totalCost[n])):
+                totalCost[n] = newCost
+                openCells.put(n, newCost + distanceScore[n[xpos]][n[ypos]])
+                prevCells[n] = currCell
+    return prevCells
 
 # Web endpoints
 @bottle.route('/')
@@ -151,7 +149,7 @@ def start():
             )
     
     return {
-        'color': '#00FF00',
+        'color': '#808FFF',
         'taunt': 'Where\'s the food?',
         'head_url': head_url,
         'head_type': 'smile',
@@ -164,98 +162,46 @@ def end():
 
 @bottle.post('/move')
 def move():
-    movementOptions = {(0,-1):'up', (0,1):'down', (-1,0):'left', (1,0):'right'}
-    foodList = []
-    preyList = []
-
     data = bottle.request.json
+    
+    movementOptions = {(0,-1):'up', (0,1):'down', (-1,0):'left', (1,0):'right'}
+    nextMove = movementOptions[data['turn'] % 4]
+
+    playfield = cPlayfield(data['width'],data['height'])
+    snakeList = processSnakes(data['snakes']['data'])
     ourSnake = cSnake(data['you'])
-    
-    # get challengers, and remove dead opponents
-    challengers = processChallengers(data['snakes']['data'])
-    
-    # generate board, and fill with movement cost of '1'
-    obstacleMap = [[CELL_VALUES['empty'] for y in range(int(data['height']))] for x in range(int(data['width']))]
-    obstacleMap = cBoard(obstacleMap)
-    travelMap = [[symbols['defaultCost'] for y in range(int(data['height']))] for x in range(int(data['width']))]
-    travelMap = cBoard(travelMap)
 
-    # Add food to obstacleMap
-    for food in data['food']['data']:
-        foodLocation = (food['x'], food['y'])
-        if (ourSnake['health'] <= symbols['starveTrigger']) or (not closeToWall(obstacleMap, foodLocation, 2)):
-            foodList.append(foodLocation)
-            obstacleMap[food['x']][food['y']] = CELL_VALUES['food']
+    foodList = processFood(data['food']['data'])
+    preyList = processPrey(snakeList, ourSnake)
 
-    for snake in challengers:
-        snakeGrowth = False
-        # mark challengers as 'walls' on obstacleMap and place warnings around larger snakes heads
+    for snake in snakeList:
         if (snake['id'] != ourSnake['id']) and (snake['length'] >= ourSnake['length']):
-            placeHalo(travelMap,snake['head'],DIRECTIONS['diag'],CELL_VALUES['slow'])
-            placeHalo(obstacleMap,snake['head'],DIRECTIONS['ortho'],CELL_VALUES['wall'])
-        # mark challengers as 'food' if they are smaller than us
-        if (snake['length'] < ourSnake['length']):
-            if closeToWall(obstacleMap, snake['head'], 2):
+            placeHalo(playfield, 'obstacles', snake['head'], directions['ortho'], cell_value['wall'])
+            placeHalo(playfield, 'movecosts', snake['head'], directions['diag'], movement_cost['slow'])
+        elif not ourSnake['starving']:
+            # hunt smaller snakes
+            trash = 1+1
+
+        neighbors = findNeighbors(snake['head'],directions['ortho'])
+        potentialGrowth = False
+        for n in neighbors:
+            if (n in foodList) and (playfield.inBounds(n)):
+                potentialGrowth = True
+                
+        for part in snake['body']:
+            if (part == snake['tail']) and (not potentialGrowth):
                 continue
-            for potentialHead in listOpenSpaces(obstacleMap, snake['head'], DIRECTIONS['ortho']):
-                preyList.append(potentialHead)
-        # Check if there is food within one cell of a snakes head
-        for candidate in DIRECTIONS['ortho']:
-            testPt = tuple(numpy.add(snake['head'], candidate))
-            if not (obstacleMap.testInBounds(testPt)):
-                continue
-            if (obstacleMap[testPt[xpos]][testPt[ypos]] == CELL_VALUES['food']):
-                snakeGrowth =  True
-        # Avoid snake tail if they may grow this turn
-        for segment in snake['body']:
-            if ((segment == snake['tail']) and (not snakeGrowth)):
-                continue
-            # Draw body segments as walls
-            if obstacleMap.testInBounds(segment):
-                obstacleMap[segment[xpos]][segment[ypos]] = CELL_VALUES['wall']
+            if playfield.inBounds(part):
+                playfield['obstacles'][part[xpos]][part[ypos]] = cell_value['wall']
 
-    # If we are hunting add prey to food list
-    if (ourSnake['health'] > symbols['starveTrigger']) and (not closeToWall(obstacleMap, ourSnake['head'], 2)):
-        foodList += preyList
-
-
-    # If foodList is empty, provide all the food as an option (does not handle no-food games)
-    if not foodList:
-        for food in data['food']['data']:
-            foodLocation = (food['x'], food['y'])
-            foodList.append(foodLocation)
-
-    # Find nearest food/prey to our head
-    target = foodList[0]
-    distanceToFood = (abs(target[xpos] - ourSnake['head'][xpos]))+(abs(target[ypos] - ourSnake['head'][ypos]))
-    for food in foodList:
-        currentDistance = (abs(food[xpos] - ourSnake['head'][xpos]))+(abs(food[ypos] - ourSnake['head'][ypos]))
-        if (currentDistance < distanceToFood):
-            distanceToFood = currentDistance
-            target = food
-
-
-    # find shortest path to food
-    path = shortestPath(obstacleMap, travelMap, ourSnake['head'], target, False)
-    # direction = random.choice(movementOptions)
-
-    # Check if a path was found, and set first move to a tile adjacent to head
-    firstMove = (0, 1)
-    if ourSnake['head'] in path:
-        firstMove = path[ourSnake['head']]
-    # If a path was not found pick open space around head
-    else:
-        firstMove = listOpenSpaces(obstacleMap, ourSnake['head'], DIRECTIONS['ortho'])[0]
-
-    nextMove = tuple(numpy.subtract(firstMove, ourSnake['head']))
-    if nextMove in movementOptions:
-        dirToMove = movementOptions[nextMove]
-    else:
-        print "Uhoh key not in movementOptions we gonna die"
-        dirToMove = 'right'
+    target = findNearestFood(foodList, ourSnake)
+    if target:
+        path = findShortestPath(playfield, ourSnake['head'], target)
+        nextCell = path[ourSnake['head']]
+        nextMove = movementOptions[(nextCell[xpos] - ourSnake['head'][xpos],nextCell[ypos] - ourSnake['head'][ypos])]
 
     return {
-        'move': dirToMove,
+        'move': nextMove,
         'taunt': "Kept you waiting huh?"
     }
 
