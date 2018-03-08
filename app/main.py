@@ -31,8 +31,8 @@ class cBoard():
     height = 0
     def __init__(self, b):
         self.field = b
-        self.width = len(b[0])
-        self.height = len(b)
+        self.width = len(b)
+        self.height = len(b[0])
 
     def __getitem__(self, id):
         return self.field[id]
@@ -105,7 +105,7 @@ def placeHalo(board, snake, targets, val):
         board[candidate[xpos]][candidate[ypos]] = val
 
 def shortestPath(obstacles, travelWeights, startPoint, endPoint, earlyReturn = False):
-    distScore = [[abs(i - startPoint[xpos])+abs(j - startPoint[ypos]) for i in range(obstacles.width)] for j in range(obstacles.height)]
+    distScore = [[abs(j - startPoint[xpos])+abs(i - startPoint[ypos]) for i in range(obstacles.height)] for j in range(obstacles.width)]
     distScore = cBoard(distScore)
 
     cameFrom = {}
@@ -175,9 +175,9 @@ def move():
     challengers = processChallengers(data['snakes']['data'])
     
     # generate board, and fill with movement cost of '1'
-    obstacleMap = [[CELL_VALUES['empty'] for x in range(int(data['width']))] for y in range(int(data['height']))]
+    obstacleMap = [[CELL_VALUES['empty'] for y in range(int(data['height']))] for x in range(int(data['width']))]
     obstacleMap = cBoard(obstacleMap)
-    travelMap = [[symbols['defaultCost'] for x in range(int(data['width']))] for y in range(int(data['height']))]
+    travelMap = [[symbols['defaultCost'] for y in range(int(data['height']))] for x in range(int(data['width']))]
     travelMap = cBoard(travelMap)
 
     # Add food to obstacleMap
