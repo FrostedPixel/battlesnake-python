@@ -165,7 +165,7 @@ def move():
     data = bottle.request.json
     
     movementOptions = {(0,-1):'up', (0,1):'down', (-1,0):'left', (1,0):'right'}
-    nextMove = movementOptions[data['turn'] % 4]
+    nextMove = 'down'
 
     playfield = cPlayfield(data['width'],data['height'])
     snakeList = processSnakes(data['snakes']['data'])
