@@ -3,7 +3,6 @@ import os
 from Queue import PriorityQueue
 
 # Constants
-xpos,ypos = 0,1
 cell_value = {
         'wall':-1,
         'empty':0,
@@ -38,8 +37,8 @@ class cPlayfield():
         return self._fields[id]
 
     def inBounds(self, pos):
-        return ((pos[xpos] >= 0 and pos[xpos] < self.width) \
-                and (pos[ypos] >= 0 and pos[ypos] < self.height))
+        return ((pos['x'] >= 0 and pos['x'] < self.width) \
+                and (pos['y'] >= 0 and pos['y'] < self.height))
 
 class cSnake():
     _map = {}
@@ -48,7 +47,7 @@ class cSnake():
         self._map['health'] = s['health']
         self._map['length'] = len(s['body'])
         self._map['name'] = s['name']
-        self._map['body'] = [(p['x'],p['y']) for p in s['body']]
+        self._map['body'] = s['body']
 
         self._map['head'] = self._map['body'][0]
         self._map['tail'] = self._map['body'][-1]
@@ -77,14 +76,14 @@ def processPrey(snakes, ourSnake):
     plist = []
     for p in snakes:
         if p['length'] < ourSnake['length']:
-            plist.append((p['head'][xpos],p['head'][ypos]))
+            plist.append((p['head']['x'],p['head']['y']))
     return plist
 
 def findNearestFood(food, ourSnake):
     target = food[0]
-    dist = (food[0][xpos] - ourSnake['head'][xpos]) + (food[0][ypos] - ourSnake['head'][ypos])
+    dist = (food[0]['x'] - ourSnake['head']['x']) + (food[0]['y'] - ourSnake['head']['y'])
     for f in food:
-        newDist = (f[xpos] - ourSnake['head'][xpos]) + (f[ypos] - ourSnake['head'][ypos])
+        newDist = (f['x'] - ourSnake['head']['x']) + (f['y'] - ourSnake['head']['y'])
         if newDist < dist:
             dist = newDist
             target = f
@@ -93,17 +92,17 @@ def findNearestFood(food, ourSnake):
 def findNeighbors(pos, directions):
     c = []
     for d in directions:
-        c.append((d[xpos] + pos[xpos],d[ypos] + pos[ypos]))
+        c.append((d['x'] + pos['x'],d['y'] + pos['y']))
     return c
 
 def placeHalo(playfield, key, pos, targets, value):
     targets = findNeighbors(pos, targets)
     for t in targets:
         if playfield.inBounds(t):
-            playfield[key][t[xpos]][t[ypos]] = value
+            playfield[key][t['x']][t['y']] = value
 
 def findShortestPath(playfield, start, target):
-    distanceScore = [[(abs(x - start[xpos])+abs(y - start[ypos])) for y in range(playfield.height)] for x in range(playfield.width)]
+    distanceScore = [[(abs(x - start['x'])+abs(y - start['y'])) for y in range(playfield.height)] for x in range(playfield.width)]
 
     prevCells = {}
     totalCost = {}
@@ -122,12 +121,12 @@ def findShortestPath(playfield, start, target):
         for n in neighbors:
             if (not playfield.inBounds(n)):
                 continue
-            if (playfield['obstacles'][n[xpos]][n[ypos]] == cell_value['wall']):
+            if (playfield['obstacles'][n['x']][n['y']] == cell_value['wall']):
                 continue
-            newCost = totalCost[currCell] + playfield['movecosts'][n[xpos]][n[ypos]]
+            newCost = totalCost[currCell] + playfield['movecosts'][n['x']][n['y']]
             if ((n not in totalCost) or (newCost < totalCost[n])):
                 totalCost[n] = newCost
-                openCells.put(n, newCost + distanceScore[n[xpos]][n[ypos]])
+                openCells.put(n, newCost + distanceScore[n['x']][n['y']])
                 prevCells[n] = currCell
     return prevCells
 
@@ -190,7 +189,7 @@ def move():
             if (part == snake['tail']) and (not potentialGrowth):
                 continue
             if playfield.inBounds(part):
-                playfield['obstacles'][part[xpos]][part[ypos]] = cell_value['wall']
+                playfield['obstacles'][part['x']][part['y']] = cell_value['wall']
 
     target = findNearestFood(foodList, ourSnake)
     if target:
@@ -198,7 +197,7 @@ def move():
         print path
         if ourSnake['head'] in path:
             nextCell = path[ourSnake['head']]
-            nextMove = movementOptions[(nextCell[xpos] - ourSnake['head'][xpos],nextCell[ypos] - ourSnake['head'][ypos])]
+            nextMove = movementOptions[(nextCell['x'] - ourSnake['head']['x'],nextCell['y'] - ourSnake['head']['y'])]
 
     return {
         'move': nextMove,
