@@ -167,11 +167,14 @@ def move():
 
     if len(preyList) > 0:
         target = gameBoard.findNearestPrey(ourSnake['head'])
+        print 'hunting:',target
     else:
         target = gameBoard.findNearestFood(ourSnake['head'])
+        print 'gathering:',target
 
     if not target:
         target = ourSnake['tail']
+        print 'cowering:',target
 
     path = findShortestPath(gameBoard, ourSnake['head'], target)
 
@@ -180,7 +183,7 @@ def move():
     else:
         neighbours = gameBoard.openNeighbours(ourSnake['head'])
         nextCell = neighbours[randint(0,len(neighbours) - 1)]
-
+        print '???'
     return {
         'move': movementOptions[(nextCell[0] - ourSnake['head'][0], nextCell[1] - ourSnake['head'][1])],
     }
