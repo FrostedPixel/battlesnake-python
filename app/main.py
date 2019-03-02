@@ -142,16 +142,19 @@ def move():
             gameBoard.addObstacles((seg['x'],seg['y']))
 
     foodList    = [(fd['x'],fd['y']) for fd in data['board']['food']]
-    gameBoard.addFoods(foodList)
+    if len(foodList) > 0:
+        gameBoard.addFoods(foodList)
 
     gameBoard['obstacles'][ourSnake['head'][0]][ourSnake['head'][1]] = cellValue['empty']
 
-    target = gameBoard.findNearestFood(ourSnake['head'])
-    path = findShortestPath(gameBoard, ourSnake['head'], target)
+    if len(foodList) > 0:
+        target = gameBoard.findNearestFood(ourSnake['head'])
+        path = findShortestPath(gameBoard, ourSnake['head'], target)
 
-    nextCell = path[ourSnake['head']]
-    print "t:",target,"h:",ourSnake['head'],"p:",path[ourSnake['head']],"m:",movementOptions[(nextCell[0] - ourSnake['head'][0], nextCell[1] - ourSnake['head'][1])]
-
+        nextCell = path[ourSnake['head']]
+        print "t:",target,"h:",ourSnake['head'],"p:",path[ourSnake['head']],"m:",movementOptions[(nextCell[0] - ourSnake['head'][0], nextCell[1] - ourSnake['head'][1])]
+    else:
+        nextCell = gameBoard.openNeighbours(ourSnake['head'])[0]
     return {
         'move': movementOptions[(nextCell[0] - ourSnake['head'][0], nextCell[1] - ourSnake['head'][1])],
     }
