@@ -22,7 +22,7 @@ class cPlayfield():
         self.height = h
 
         self._fields['obstacles'] = [[cell_value['empty'] for y in range(h)] for x in range(w)]
-        self._fields['movecosts'] = [1 for y in range(h)] for x in range(w)]
+        self._fields['movecosts'] = [[1 for y in range(h)] for x in range(w)]
 
     def __getitem__(self, id):
         return self._fields[id]
