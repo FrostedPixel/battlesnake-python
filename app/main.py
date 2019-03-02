@@ -22,7 +22,7 @@ class cBoard():
         self.height = h
 
         self._fields['obstacles']   = [[cellValue['empty'] for y in range(h)] for x in range(w)]
-        self._fields['food']        = [[cellValue['empty'] for y in range(h)] for x in range(w)]
+        self._fields['foods']       = []
         self._fields['movecosts']   = [[1 for y in range(h)] for x in range(w)]
 
     def __getitem__(self, id):
@@ -41,6 +41,16 @@ class cBoard():
                     neighbours.append((xpos,ypos))
         return neighbours
 
+    def findNearestFood(self, pos):
+        nearestFood = self._fields['foods'][0]
+        foodDistance = self.width * self.height
+        for fd in self._fields['foods']:
+            dist = self.findDistance(pos,fd)
+            if(dist < foodDistance):
+                foodDistance = dist
+                nearestFood = fd
+        return nearestFood
+
     def findDistance(self, apos, bpos):
         return (abs(apos[0] - bpos[0]) + abs(apos[1] - bpos[1]))
 
@@ -49,10 +59,8 @@ class cBoard():
             if self.inBounds(ob):
                 self._fields['obstacles'][ob[0]][ob[1]] = cellValue['obst']
 
-    def addFoods(self, food):
-        for fd in food:
-            if self.inBounds(fd):
-                self._fields['food'][fd[0]][fd[1]] = cellValue['food']
+    def addFoods(self, foods):
+        self._fields['foods'] = foods
 
 class cSnake():
     _map = {}
@@ -67,12 +75,6 @@ class cSnake():
 
     def __getitem__(self, key):
         return self._map[key]
-
-def findNeighbors(pos, directions):
-    c = []
-    for d in directions:
-        c.append((d[0] + pos['x'],d[1] + pos['y']))
-    return c
 
 def findShortestPath(playfield, start, target):
     distanceScore = [[(abs(x - start['x'])+abs(y - start['y'])) for y in range(playfield.height)] for x in range(playfield.width)]
@@ -90,7 +92,7 @@ def findShortestPath(playfield, start, target):
         currCell = openCells.get()
         if (currCell == start):
             break
-        neighbors = findNeighbors(currCell, directions['ortho'])
+        neighbors = playfield.openNeighbours(currCell)
         for n in neighbors:
             if (not playfield.inBounds(n)):
                 continue
@@ -144,6 +146,9 @@ def move():
     for snake in snakeList:
         gameBoard.addObstacles(snake['body'])
     gameBoard.addFoods(foodList)
+
+    target = gameBoard.findNearestFood(ourSnake['head'])
+    path = findShortestPath(gameBoard, ourSnake['head'], target)
 
     return {
         'move': nextMove,
