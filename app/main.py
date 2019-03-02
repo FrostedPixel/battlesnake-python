@@ -9,16 +9,6 @@ cell_value = {
         'food':10,
     }
 
-movement_cost = {
-        'default':1,
-        'slow':5
-    }
-
-behaviour_trigger = {
-        'starve':25
-    }
-
-
 # Classes
 class cPlayfield():
     _fields = {}
@@ -27,7 +17,7 @@ class cPlayfield():
         self.height = h
 
         self._fields['obstacles'] = [[cell_value['empty'] for y in range(h)] for x in range(w)]
-        self._fields['movecosts'] = [[movement_cost['default'] for y in range(h)] for x in range(w)]
+        self._fields['movecosts'] = [1 for y in range(h)] for x in range(w)]
 
     def __getitem__(self, id):
         return self._fields[id]
@@ -54,48 +44,11 @@ class cSnake():
     def __getitem__(self, key):
         return self._map[key]
 
-# Helper functions
-def processSnakes(snakes):
-    slist = []
-    for s in snakes:
-        if s['health'] > 0:
-            slist.append(cSnake(s))
-    return slist
-
-def processFood(food):
-    flist = []
-    for f in food:
-        flist.append((f['x'],f['y']))
-    return flist
-
-def processPrey(snakes, ourSnake):
-    plist = []
-    for p in snakes:
-        if p['length'] < ourSnake['length']:
-            plist.append((p['head']['x'],p['head']['y']))
-    return plist
-
-def findNearestFood(food, ourSnake):
-    target = food[0]
-    dist = (food[0]['x'] - ourSnake['head']['x']) + (food[0]['y'] - ourSnake['head']['y'])
-    for f in food:
-        newDist = (f['x'] - ourSnake['head']['x']) + (f['y'] - ourSnake['head']['y'])
-        if newDist < dist:
-            dist = newDist
-            target = f
-    return target
-
 def findNeighbors(pos, directions):
     c = []
     for d in directions:
         c.append((d[0] + pos['x'],d[1] + pos['y']))
     return c
-
-def placeHalo(playfield, key, pos, targets, value):
-    targets = findNeighbors(pos, targets)
-    for t in targets:
-        if playfield.inBounds(t):
-            playfield[key][t['x']][t['y']] = value
 
 def findShortestPath(playfield, start, target):
     distanceScore = [[(abs(x - start['x'])+abs(y - start['y'])) for y in range(playfield.height)] for x in range(playfield.width)]
@@ -157,25 +110,11 @@ def ping():
 def move():
     data = bottle.request.json
 
-    movementOptions = {(0,-1):'up', (0,1):'down', (-1,0):'left', (1,0):'right'}
+    #movementOptions = {(0,-1):'up', (0,1):'down', (-1,0):'left', (1,0):'right'}
     nextMove = 'down'
 
     playfield = cPlayfield(data['board']['width'],data['board']['height'])
-    snakeList = processSnakes(data['board']['snakes'])
     ourSnake = cSnake(data['you'])
-
-    foodList = processFood(data['board']['food'])
-    preyList = processPrey(snakeList, ourSnake)
-
-    target = findNearestFood(foodList, ourSnake)
-    if target:
-        path = findShortestPath(playfield, ourSnake['head'], target)
-        if ourSnake['head'] in path:
-            nextCell = path[ourSnake['head']]
-            nextMove = movementOptions[(nextCell[xpos] - ourSnake['head'][xpos],nextCell[ypos] - ourSnake['head'][ypos])]
-        else:
-            print "ourSnake not in path this is bad"
-    print "taking move " + nextMove
 
     return {
         'move': nextMove,
