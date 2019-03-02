@@ -18,10 +18,6 @@ behaviour_trigger = {
         'starve':25
     }
 
-directions = {
-        'ortho':[(-1,0),(0,-1),(1,0),(0,1)],
-        'diag': [(-1,1),(-1,-1),(1,-1),(1,1)]
-     }
 
 # Classes
 class cPlayfield():
@@ -171,33 +167,15 @@ def move():
     foodList = processFood(data['board']['food'])
     preyList = processPrey(snakeList, ourSnake)
 
-    for snake in snakeList:
-        if (snake['id'] != ourSnake['id']) and (snake['length'] >= ourSnake['length']):
-            placeHalo(playfield, 'obstacles', snake['head'], directions['ortho'], cell_value['wall'])
-            placeHalo(playfield, 'movecosts', snake['head'], directions['diag'], movement_cost['slow'])
-        elif not ourSnake['starving']:
-            # hunt smaller snakes
-            trash = 1+1
-
-        neighbors = findNeighbors(snake['head'],directions['ortho'])
-        potentialGrowth = False
-        for n in neighbors:
-            if (n in foodList) and (playfield.inBounds(n)):
-                potentialGrowth = True
-
-        for part in snake['body']:
-            if (part == snake['tail']) and (not potentialGrowth):
-                continue
-            if playfield.inBounds(part):
-                playfield['obstacles'][part['x']][part['y']] = cell_value['wall']
-
     target = findNearestFood(foodList, ourSnake)
     if target:
         path = findShortestPath(playfield, ourSnake['head'], target)
-        print path
         if ourSnake['head'] in path:
             nextCell = path[ourSnake['head']]
-            nextMove = movementOptions[(nextCell['x'] - ourSnake['head']['x'],nextCell['y'] - ourSnake['head']['y'])]
+            nextMove = movementOptions[(nextCell[xpos] - ourSnake['head'][xpos],nextCell[ypos] - ourSnake['head'][ypos])]
+        else:
+            print "ourSnake not in path this is bad"
+    print "taking move " + nextMove
 
     return {
         'move': nextMove,
