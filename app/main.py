@@ -138,7 +138,8 @@ def move():
     gameBoard   = cBoard(data['board']['width'],data['board']['height'])
     ourSnake    = cSnake(data['you'])
     for sk in data['board']['snakes']:
-        gameBoard.addObstacles((sk['body']['x'],sk['body']['y']))
+        for seg in sk['body']:
+            gameBoard.addObstacles((seg['x'],seg['y']))
 
     foodList    = [(fd['x'],fd['y']) for fd in data['board']['food']]
     gameBoard.addFoods(foodList)
