@@ -49,7 +49,7 @@ class cSnake():
         self._map['length'] = len(s['body'])
         self._map['name'] = s['name']
         self._map['body'] = [(p['x'],p['y']) for p in s['body']]
-        
+
         self._map['head'] = self._map['body'][0]
         self._map['tail'] = self._map['body'][-1]
         self._map['starving'] = False
@@ -161,7 +161,7 @@ def ping():
 @bottle.post('/move')
 def move():
     data = bottle.request.json
-    
+
     movementOptions = {(0,-1):'up', (0,1):'down', (-1,0):'left', (1,0):'right'}
     nextMove = 'down'
 
@@ -185,7 +185,7 @@ def move():
         for n in neighbors:
             if (n in foodList) and (playfield.inBounds(n)):
                 potentialGrowth = True
-                
+
         for part in snake['body']:
             if (part == snake['tail']) and (not potentialGrowth):
                 continue
@@ -195,8 +195,10 @@ def move():
     target = findNearestFood(foodList, ourSnake)
     if target:
         path = findShortestPath(playfield, ourSnake['head'], target)
-        nextCell = path[ourSnake['head']]
-        nextMove = movementOptions[(nextCell[xpos] - ourSnake['head'][xpos],nextCell[ypos] - ourSnake['head'][ypos])]
+        print path
+        if ourSnake['head']] in path:
+            nextCell = path[ourSnake['head']]
+            nextMove = movementOptions[(nextCell[xpos] - ourSnake['head'][xpos],nextCell[ypos] - ourSnake['head'][ypos])]
 
     return {
         'move': nextMove,
