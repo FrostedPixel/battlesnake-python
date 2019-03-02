@@ -24,6 +24,7 @@ class cBoard():
 
         self._fields['obstacles']   = [[cellValue['empty'] for y in range(h)] for x in range(w)]
         self._fields['foods']       = []
+        self._fields['prey']        = []
         self._fields['movecosts']   = [[1 for y in range(h)] for x in range(w)]
 
     def __getitem__(self, id):
@@ -42,17 +43,23 @@ class cBoard():
                     neighbours.append((xpos,ypos))
         return neighbours
 
-    def findNearestFood(self, pos):
-        if len(self._fields['foods']) == 0:
+    def findNearestTarget(self, pos, key):
+        if len(self._fields[key]) == 0:
             return None
-        nearestFood = self._fields['foods'][0]
-        foodDistance = self.width * self.height
-        for fd in self._fields['foods']:
+        nearestTarget = self._fields[key][0]
+        targetDistance = self.width * self.height
+        for fd in self._fields[key]:
             dist = self.findDistance(pos,fd)
-            if(dist < foodDistance):
-                foodDistance = dist
-                nearestFood = fd
-        return nearestFood
+            if(dist < targetDistance):
+                targetDistance = dist
+                nearestTarget = fd
+        return nearestTarget
+
+    def findNearestFood(self, pos):
+        return self.findNearestTarget(pos, 'foods')
+
+    def findNearestPrey(self, pos):
+        return self.findNearestTarget(pos, 'prey')
 
     def findDistance(self, apos, bpos):
         return (abs(apos[0] - bpos[0]) + abs(apos[1] - bpos[1]))
@@ -64,6 +71,9 @@ class cBoard():
 
     def addFoods(self, foods):
         self._fields['foods'] = foods
+
+    def addPrey(self, prey):
+        self._fields['prey'] = prey
 
 class cSnake():
     _map = {}
@@ -140,18 +150,29 @@ def move():
 
     gameBoard   = cBoard(data['board']['width'],data['board']['height'])
     ourSnake    = cSnake(data['you'])
+
+    preyList = []
     for sk in data['board']['snakes']:
+        if len(sk['body']) > ourSnake['length']:
+            preyList.append((sk['body'][0]['x'],sk['body'][0]['y']))
         for seg in sk['body']:
             gameBoard.addObstacles([(seg['x'],seg['y'])])
+
+    gameBoard.addPrey(preyList)
 
     foodList    = [(fd['x'],fd['y']) for fd in data['board']['food']]
     gameBoard.addFoods(foodList)
 
     gameBoard['obstacles'][ourSnake['head'][0]][ourSnake['head'][1]] = cellValue['empty']
 
-    target = gameBoard.findNearestFood(ourSnake['head'])
+    if len(preyList) > 0:
+        target = gameBoard.findNearestPrey(ourSnake['head'])
+    else:
+        target = gameBoard.findNearestFood(ourSnake['head'])
+
     if not target:
         target = ourSnake['tail']
+
     path = findShortestPath(gameBoard, ourSnake['head'], target)
 
     if ourSnake['head'] in path:
