@@ -137,7 +137,7 @@ def move():
 
     gameBoard   = cBoard(data['board']['width'],data['board']['height'])
     ourSnake    = cSnake(data['you'])
-    print "snake init:",ourSnake
+    print "snake init:",ourSnake['body']
     snakeList   = [cSnake(sk) for sk in data['board']['snakes']]
     foodList    = [(fd['x'],fd['y']) for fd in data['board']['food']]
     for snake in snakeList:
@@ -146,6 +146,7 @@ def move():
 
     gameBoard['obstacles'][ourSnake['head'][0]][ourSnake['head'][1]] = cellValue['empty']
 
+    print ourSnake['head']
     target = gameBoard.findNearestFood(ourSnake['head'])
     path = findShortestPath(gameBoard, ourSnake['head'], target)
 
