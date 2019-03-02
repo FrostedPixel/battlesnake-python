@@ -196,7 +196,7 @@ def move():
     if target:
         path = findShortestPath(playfield, ourSnake['head'], target)
         print path
-        if ourSnake['head']] in path:
+        if ourSnake['head'] in path:
             nextCell = path[ourSnake['head']]
             nextMove = movementOptions[(nextCell[xpos] - ourSnake['head'][xpos],nextCell[ypos] - ourSnake['head'][ypos])]
 
