@@ -92,7 +92,7 @@ def findNearestFood(food, ourSnake):
 def findNeighbors(pos, directions):
     c = []
     for d in directions:
-        c.append((d['x'] + pos['x'],d['y'] + pos['y']))
+        c.append((d[0] + pos['x'],d[1] + pos['y']))
     return c
 
 def placeHalo(playfield, key, pos, targets, value):
@@ -121,12 +121,12 @@ def findShortestPath(playfield, start, target):
         for n in neighbors:
             if (not playfield.inBounds(n)):
                 continue
-            if (playfield['obstacles'][n['x']][n['y']] == cell_value['wall']):
+            if (playfield['obstacles'][n[0]][n[1]] == cell_value['wall']):
                 continue
-            newCost = totalCost[currCell] + playfield['movecosts'][n['x']][n['y']]
+            newCost = totalCost[currCell] + playfield['movecosts'][n[0]][n[1]]
             if ((n not in totalCost) or (newCost < totalCost[n])):
                 totalCost[n] = newCost
-                openCells.put(n, newCost + distanceScore[n['x']][n['y']])
+                openCells.put(n, newCost + distanceScore[n[0]][n[1]])
                 prevCells[n] = currCell
     return prevCells
 
