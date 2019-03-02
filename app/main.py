@@ -77,7 +77,7 @@ class cSnake():
         return self._map[key]
 
 def findShortestPath(playfield, start, target):
-    distanceScore = [[(abs(x - start['x'])+abs(y - start['y'])) for y in range(playfield.height)] for x in range(playfield.width)]
+    distanceScore = [[(abs(x - start[0])+abs(y - start[1])) for y in range(playfield.height)] for x in range(playfield.width)]
 
     prevCells = {}
     totalCost = {}
@@ -93,16 +93,16 @@ def findShortestPath(playfield, start, target):
         if (currCell == start):
             break
         neighbors = playfield.openNeighbours(currCell)
-        for n in neighbors:
-            if (not playfield.inBounds(n)):
+        for nb in neighbors:
+            if (not playfield.inBounds(nb)):
                 continue
-            if (playfield['obstacles'][n[0]][n[1]] == cellValue['obst']):
+            if (playfield['obstacles'][nb[0]][nb[1]] == cellValue['obst']):
                 continue
-            newCost = totalCost[currCell] + playfield['movecosts'][n[0]][n[1]]
-            if ((n not in totalCost) or (newCost < totalCost[n])):
-                totalCost[n] = newCost
-                openCells.put(n, newCost + distanceScore[n[0]][n[1]])
-                prevCells[n] = currCell
+            newCost = totalCost[currCell] + playfield['movecosts'][nb[0]][nb[1]]
+            if ((nb not in totalCost) or (newCost < totalCost[nb])):
+                totalCost[nb] = newCost
+                openCells.put(nb, newCost + distanceScore[nb[0]][nb[1]])
+                prevCells[nb] = currCell
     return prevCells
 
 # Web endpoints
