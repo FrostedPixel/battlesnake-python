@@ -48,7 +48,7 @@ class cSnake():
         self._map['health'] = s['health']
         self._map['length'] = s['length']
         self._map['name'] = s['name']
-        self._map['body'] = [(p['x'],p['y']) for p in s['body']['data']]
+        self._map['body'] = [(p['x'],p['y']) for p in s['body']]
         
         self._map['head'] = self._map['body'][0]
         self._map['tail'] = self._map['body'][-1]
@@ -144,17 +144,10 @@ def static(path):
 def start():
     data = bottle.request.json
 
-    head_url = '%s://%s/static/snake.jpeg' % (
-                bottle.request.urlparts.scheme,
-                bottle.request.urlparts.netloc
-            )
-    
     return {
         'color': '#808FFF',
-        'taunt': 'Where\'s the food?',
-        'head_url': head_url,
-        'head_type': 'smile',
-        'tail_type': 'regular'
+        'headType': 'smile',
+        'tailType': 'regular'
     }
 
 @bottle.post('/end')
@@ -168,11 +161,11 @@ def move():
     movementOptions = {(0,-1):'up', (0,1):'down', (-1,0):'left', (1,0):'right'}
     nextMove = 'down'
 
-    playfield = cPlayfield(data['width'],data['height'])
-    snakeList = processSnakes(data['snakes']['data'])
+    playfield = cPlayfield(data['board']['width'],data['board']['height'])
+    snakeList = processSnakes(data['snakes'])
     ourSnake = cSnake(data['you'])
 
-    foodList = processFood(data['food']['data'])
+    foodList = processFood(data['board']['food'])
     preyList = processPrey(snakeList, ourSnake)
 
     for snake in snakeList:
@@ -203,7 +196,6 @@ def move():
 
     return {
         'move': nextMove,
-        'taunt': "Kept you waiting huh?"
     }
 
 # Expose WSGI app (so gunicorn can find it)
