@@ -1,5 +1,6 @@
 import bottle
 import os
+from random import randint
 from Queue import PriorityQueue
 
 # Constants
@@ -145,18 +146,19 @@ def move():
     if len(foodList) > 0:
         gameBoard.addFoods(foodList)
 
-    gameBoard['obstacles'][ourSnake['head'][0]][ourSnake['head'][1]] = cellValue['empty']
+        gameBoard['obstacles'][ourSnake['head'][0]][ourSnake['head'][1]] = cellValue['empty']
 
-    if len(foodList) > 0:
         target = gameBoard.findNearestFood(ourSnake['head'])
         path = findShortestPath(gameBoard, ourSnake['head'], target)
 
         if ourSnake['head'] in path:
             nextCell = path[ourSnake['head']]
         else:
-            nextCell = gameBoard.openNeighbours(ourSnake['head'])[0]
+            neighbours = gameBoard.openNeighbours(ourSnake['head'])
+            nextCell = neighbours[randint(0,len(neighbours) - 1)]
     else:
-        nextCell = gameBoard.openNeighbours(ourSnake['head'])[0]
+        neighbours = gameBoard.openNeighbours(ourSnake['head'])
+        nextCell = neighbours[randint(0,len(neighbours) - 1)]
     return {
         'move': movementOptions[(nextCell[0] - ourSnake['head'][0], nextCell[1] - ourSnake['head'][1])],
     }
