@@ -125,7 +125,7 @@ def start():
 @bottle.post('/end')
 def end():
     return "ack"
-    
+
 @bottle.post('/ping')
 def ping():
     return "pong"
@@ -137,8 +137,13 @@ def move():
     #movementOptions = {(0,-1):'up', (0,1):'down', (-1,0):'left', (1,0):'right'}
     nextMove = 'down'
 
-    gameBoard = cBoard(data['board']['width'],data['board']['height'])
-    ourSnake = cSnake(data['you'])
+    gameBoard   = cBoard(data['board']['width'],data['board']['height'])
+    ourSnake    = cSnake(data['you'])
+    snakeList   = [cSnake(sk) for sk in data['board']['snakes']]
+    foodList    = [(fd['x'],fd['y']) for fd in data['board']['food']]
+    for snake in snakeList:
+        gameBoard.addObstacles(snake['body'])
+    gameBoard.addFoods(foodList)
 
     return {
         'move': nextMove,
@@ -150,6 +155,6 @@ application = bottle.default_app()
 if __name__ == '__main__':
     bottle.run(
         application,
-        host=os.getenv('IP', '0.0.0.0'),
-        port=os.getenv('PORT', '8080'),
+        host = os.getenv('IP', '0.0.0.0'),
+        port = os.getenv('PORT', '8080'),
         debug = True)
