@@ -148,6 +148,7 @@ def move():
     target = gameBoard.findNearestFood(ourSnake['head'])
     path = findShortestPath(gameBoard, ourSnake['head'], target)
 
+    print "t:",target,"h:",ourSnake['head'],"p:",path[ourSnake['head']]
     nextCell = path[ourSnake['head']]
 
     return {
