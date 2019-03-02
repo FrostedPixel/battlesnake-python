@@ -154,6 +154,10 @@ def start():
 def end():
     return "ack"
 
+@bottle.post('/ping')
+def ping():
+    return "pong"
+
 @bottle.post('/move')
 def move():
     data = bottle.request.json
