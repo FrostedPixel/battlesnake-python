@@ -9,6 +9,11 @@ cell_value = {
         'food':10,
     }
 
+directions = {
+        'ortho':[(-1,0),(0,-1),(1,0),(0,1)],
+        'diag': [(-1,1),(-1,-1),(1,-1),(1,1)]
+     }
+
 # Classes
 class cPlayfield():
     _fields = {}
