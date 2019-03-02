@@ -154,7 +154,8 @@ def move():
     preyList = []
     for sk in data['board']['snakes']:
         if len(sk['body']) < ourSnake['length']:
-            preyList.append((sk['body'][0]['x'],sk['body'][0]['y']))
+            #preyList.append((sk['body'][0]['x'],sk['body'][0]['y']))
+            preyList = preyList + gameBoard.openNeighbours((sk['body'][0]['x'],sk['body'][0]['y']))
         for seg in sk['body']:
             gameBoard.addObstacles([(seg['x'],seg['y'])])
 
