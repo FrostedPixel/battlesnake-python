@@ -46,7 +46,7 @@ class cSnake():
     def __init__(self, s):
         self._map['id'] = s['id']
         self._map['health'] = s['health']
-        self._map['length'] = s['length']
+        self._map['length'] = len(s['body'])
         self._map['name'] = s['name']
         self._map['body'] = [(p['x'],p['y']) for p in s['body']]
         
