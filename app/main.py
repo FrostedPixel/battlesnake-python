@@ -162,7 +162,7 @@ def move():
     nextMove = 'down'
 
     playfield = cPlayfield(data['board']['width'],data['board']['height'])
-    snakeList = processSnakes(data['snakes'])
+    snakeList = processSnakes(data['board']['snakes'])
     ourSnake = cSnake(data['you'])
 
     foodList = processFood(data['board']['food'])
