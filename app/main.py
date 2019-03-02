@@ -94,10 +94,6 @@ def findShortestPath(playfield, start, target):
             break
         neighbors = playfield.openNeighbours(currCell)
         for nb in neighbors:
-            if (not playfield.inBounds(nb)):
-                continue
-            if (playfield['obstacles'][nb[0]][nb[1]] == cellValue['obst']):
-                continue
             newCost = totalCost[currCell] + playfield['movecosts'][nb[0]][nb[1]]
             if ((nb not in totalCost) or (newCost < totalCost[nb])):
                 totalCost[nb] = newCost
@@ -136,7 +132,7 @@ def ping():
 def move():
     data = bottle.request.json
 
-    #movementOptions = {(0,-1):'up', (0,1):'down', (-1,0):'left', (1,0):'right'}
+    movementOptions = {(0,-1):'up', (0,1):'down', (-1,0):'left', (1,0):'right'}
     nextMove = 'down'
 
     gameBoard   = cBoard(data['board']['width'],data['board']['height'])
@@ -150,8 +146,10 @@ def move():
     target = gameBoard.findNearestFood(ourSnake['head'])
     path = findShortestPath(gameBoard, ourSnake['head'], target)
 
+    nextCell = path[ourSnake['head']]
+
     return {
-        'move': nextMove,
+        'move': movementOptions[(nextCell[0] - ourSnake['head'][0], nextCell[1] - ourSnake['head'][1])],
     }
 
 # Expose WSGI app (so gunicorn can find it)
